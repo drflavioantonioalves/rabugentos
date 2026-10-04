@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: rabugentos
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      # Opcional: se definida, só quem souber esta senha consegue CRIAR salas.
+      - key: CREATE_KEY
+        sync: false
+      # Recomendado: guarda as salas fora do servidor (Upstash Redis, grátis). Veja o README.
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false

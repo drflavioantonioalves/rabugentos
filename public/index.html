@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rabugentos — Futebol e Resenha</title>
+<meta name="description" content="Crie a sala do seu jogo: placar ao vivo, votação do craque e do bagre e mural da resenha. A sala some sozinha em 7 dias.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Rabugentos — Futebol e Resenha">
+<meta property="og:description" content="Placar ao vivo, votação do craque e do bagre, mural da resenha. Sem cadastro.">
+<meta property="og:image" content="__ORIGIN__/og.png">
+<meta property="og:url" content="__ORIGIN__/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#09090b">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#09090b; --card:#141416; --card2:#1d1d21; --line:#2f2f35; --txt:#f5f4ef; --soft:#d8d6ce; --mut:#a3a199; --y:#fade70; --y2:#e9c64a; --ink:#111111;
+    --num:'Barlow Condensed','Roboto Condensed','sans-serif-condensed','Arial Narrow',system-ui,sans-serif; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; min-height:100vh; }
+  .topstripe { height:12px; background:linear-gradient(var(--y) 0 5px,var(--bg) 5px 7px,var(--y) 7px 12px); }
+  .wrap { max-width:560px; margin:0 auto; padding:0 18px 44px; }
+
+  .hero { position:relative; text-align:center; padding:34px 0 8px; }
+  .hero::before { content:""; position:absolute; left:50%; top:10px; width:420px; height:420px; transform:translateX(-50%); pointer-events:none;
+    background:radial-gradient(closest-side,rgba(250,222,112,.22),rgba(250,222,112,0) 70%); }
+  .shield { position:relative; width:auto; height:min(250px,36vh); filter:drop-shadow(0 14px 28px rgba(0,0,0,.7)); }
+  h1 { position:relative; font-family:var(--num); font-size:clamp(46px,14vw,66px); line-height:.95; margin:22px 0 14px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; }
+  h1 em { color:var(--y); font-style:normal; display:block; }
+  .lead { position:relative; color:var(--soft); font-size:16.5px; line-height:1.55; margin:0 auto 24px; max-width:460px; }
+  .cta { display:block; width:100%; text-align:center; font-family:var(--num); font-size:24px; letter-spacing:.8px; text-transform:uppercase; font-weight:800; padding:15px 12px 13px; border-radius:14px; border:0; background:var(--y); color:var(--ink); cursor:pointer;
+    box-shadow:0 10px 30px rgba(250,222,112,.18), inset 0 -4px 0 rgba(0,0,0,.14); }
+  .cta:active { transform:translateY(1px); } .cta:disabled { opacity:.5; }
+  .join { display:flex; gap:8px; margin-top:12px; }
+  input, select { width:100%; padding:14px; font-size:16px; border-radius:12px; border:1px solid var(--line); background:#0d0d0f; color:var(--txt); font-family:inherit; }
+  input:focus, select:focus { outline:2px solid var(--y); outline-offset:0; border-color:var(--y); }
+  .join input { text-transform:uppercase; letter-spacing:3px; text-align:center; font-weight:700; }
+  .join input::placeholder { letter-spacing:1px; font-size:14px; }
+  .btn2 { flex:none; padding:0 22px; font-family:var(--num); font-size:21px; letter-spacing:1px; text-transform:uppercase; font-weight:700; border-radius:12px; border:1px solid var(--line); background:var(--card2); color:var(--txt); cursor:pointer; }
+
+  .stripes { height:14px; margin:30px 0 4px; background:linear-gradient(var(--y) 0 5px,transparent 5px 9px,var(--y) 9px 14px); opacity:.9; border-radius:2px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 16px; margin-top:18px; }
+  .card h2 { margin:0 0 4px; font-family:var(--num); font-size:26px; letter-spacing:.8px; text-transform:uppercase; font-weight:800; }
+  label { display:block; font-size:13px; color:var(--mut); margin:14px 0 5px; }
+  .chips { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .chip { position:relative; margin:0; } .chip input { position:absolute; opacity:0; inset:0; }
+  .chip span { display:block; text-align:center; padding:13px 6px; border-radius:12px; border:2px solid var(--line); background:#0d0d0f; font-weight:600; font-size:15px; color:var(--txt); }
+  .chip input:checked + span { border-color:var(--y); background:#2b250c; color:var(--y); }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #err { color:#fca5a5; font-size:14px; margin-top:10px; min-height:18px; }
+
+  .sec { margin:34px 0 14px; display:flex; align-items:center; gap:12px; font-family:var(--num); font-size:30px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+  .sec::after { content:""; flex:1; height:8px; background:linear-gradient(var(--y) 0 3px,transparent 3px 5px,var(--y) 5px 8px); opacity:.55; }
+  .steps { display:grid; gap:10px; }
+  .step { display:flex; gap:14px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; }
+  .step .n { flex:none; width:44px; height:44px; border-radius:50%; background:var(--y); color:var(--ink); display:flex; align-items:center; justify-content:center; font-family:var(--num); font-size:26px; font-weight:800; }
+  .step b { display:block; font-size:16px; } .step span { color:var(--mut); font-size:14px; line-height:1.4; }
+  .feat { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .feat div { background:var(--card); border:1px solid var(--line); border-top:3px solid var(--y); border-radius:14px; padding:14px; font-size:14px; color:var(--soft); line-height:1.45; }
+  .feat b { display:block; color:var(--txt); font-size:16px; margin-bottom:4px; }
+  .mine a { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 0; border-top:1px solid #ffffff14; color:var(--txt); text-decoration:none; }
+  .mine a:first-of-type { border-top:0; } .mine small { color:var(--mut); } .mine b { font-family:var(--num); letter-spacing:3px; font-size:24px; color:var(--y); }
+  footer { margin-top:40px; text-align:center; color:var(--mut); font-size:12.5px; line-height:1.7; }
+  footer img { height:64px; margin-bottom:8px; opacity:.95; }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+<div class="topstripe"></div>
+<div class="wrap">
+  <section class="hero">
+    <img class="shield" src="/logo.png" alt="Rabugentos — Futebol e Resenha">
+    <h1>O jogo acabou.<em>A resenha começou.</em></h1>
+    <p class="lead">Crie a sala do jogo, mande o link no grupo e pronto: placar ao vivo, votação do craque e do bagre e mural pra zoar a semana inteira. Sem cadastro. A sala some sozinha em <span id="days">7</span> dias.</p>
+    <button class="cta" id="btnNew">⚽ Criar sala do jogo</button>
+    <div class="join"><input id="code" placeholder="CÓDIGO DA SALA" maxlength="40" autocapitalize="characters" autocomplete="off"><button class="btn2" id="btnJoin">Entrar</button></div>
+  </section>
+
+  <div class="card hide" id="form">
+    <h2>Nova sala</h2>
+    <label for="title">Nome do jogo</label><input id="title" maxlength="40" placeholder="Ex.: Pelada de quinta">
+    <div class="row2">
+      <div><label for="date">Data</label><input type="date" id="date"></div>
+      <div><label for="venue">Campo (opcional)</label><input id="venue" maxlength="60" placeholder="Society do Zé"></div>
+    </div>
+    <div class="row2">
+      <div><label for="ta">Time A</label><input id="ta" maxlength="24" placeholder="Time A"></div>
+      <div><label for="tb">Time B</label><input id="tb" maxlength="24" placeholder="Time B"></div>
+    </div>
+    <label>Formato do jogo</label>
+    <div class="chips">
+      <label class="chip"><input type="radio" name="preset" value="2x30" checked><span>2 tempos de 30</span></label>
+      <label class="chip"><input type="radio" name="preset" value="1x60"><span>1 tempo de 60</span></label>
+      <label class="chip"><input type="radio" name="preset" value="1x40"><span>1 tempo de 40</span></label>
+      <label class="chip"><input type="radio" name="preset" value="custom"><span>Personalizado</span></label>
+      <label class="chip" style="grid-column:1/-1"><input type="radio" name="preset" value="noclock"><span>Sem relógio</span></label>
+    </div>
+    <div class="row2 hide" id="custom">
+      <div><label for="halves">Tempos</label><select id="halves"><option value="1">1 tempo</option><option value="2" selected>2 tempos</option></select></div>
+      <div><label for="minutes">Minutos por tempo</label><input type="number" id="minutes" min="1" max="120" value="30"></div>
+    </div>
+    <div class="hide" id="keyBox"><label for="ckey">Senha para criar salas</label><input type="password" id="ckey" autocomplete="off"></div>
+    <button class="cta" id="btnCreate" style="margin-top:20px">Criar e abrir a sala</button>
+    <div id="err"></div>
+  </div>
+
+  <div class="card mine hide" id="mine"><h2>Minhas salas</h2><div id="mineList"></div></div>
+
+  <div class="sec">Como funciona</div>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div><b>Crie a sala do jogo</b><span>Nome, campo, times e formato: 2 tempos, 1 tempo ou sem relógio.</span></div></div>
+    <div class="step"><div class="n">2</div><div><b>Mande o link no grupo</b><span>Goleiros e o espectador oficial ganham um link para marcar os gols.</span></div></div>
+    <div class="step"><div class="n">3</div><div><b>Resenhe a semana toda</b><span>Vote no craque e no bagre, comente, reaja e gere o cartão da noite.</span></div></div>
+  </div>
+
+  <div class="sec">No jogo</div>
+  <div class="feat">
+    <div><b>⚽ Placar ao vivo</b>Gols em tempo real, com quem anotou. Se parecer o mesmo gol, o app pergunta.</div>
+    <div><b>🗳️ Votações</b>Craque, bagre, frangueiro, garçom e maior zoeira, com revelação suspense.</div>
+    <div><b>💬 Mural</b>Comentários, reações e frases prontas pra zoar o amigo.</div>
+    <div><b>🖼️ Cartão da noite</b>Imagem pronta pro grupo. É a lembrança: a sala some.</div>
+  </div>
+
+  <div class="stripes"></div>
+  <footer>
+    <img src="/logo.png" alt="">
+    <div>Futebol e resenha · cada jogo é um jogo.</div>
+    <div>Nada fica guardado depois que a sala expira.</div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  $('date').value = today();
+
+  fetch('/api/config').then(function (r) { return r.json(); }).then(function (c) {
+    $('days').textContent = c.days; if (c.needsCreateKey) $('keyBox').classList.remove('hide');
+  }).catch(function () {});
+
+  $('btnNew').onclick = function () { $('form').classList.remove('hide'); $('form').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { $('title').focus(); }, 400); };
+  document.querySelectorAll('input[name=preset]').forEach(function (r) { r.onchange = function () { $('custom').classList.toggle('hide', document.querySelector('input[name=preset]:checked').value !== 'custom'); }; });
+
+  function go() {
+    var v = $('code').value.trim(); if (!v) return;
+    var m = v.match(/\/s\/([A-Za-z0-9]+)/); var code = (m ? m[1] : v).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code) location.href = '/s/' + code;
+  }
+  $('btnJoin').onclick = go; $('code').addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+
+  $('btnCreate').onclick = function () {
+    var btn = this, err = $('err'); err.textContent = ''; btn.disabled = true;
+    var preset = document.querySelector('input[name=preset]:checked').value;
+    fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      title: $('title').value, date: $('date').value, venue: $('venue').value, teamA: $('ta').value, teamB: $('tb').value,
+      preset: preset, halves: $('halves').value, minutes: $('minutes').value, createKey: $('ckey').value
+    }) }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) throw new Error(j.error || 'Não foi possível criar a sala.');
+      try { localStorage.setItem('rab_room_' + j.code, JSON.stringify({ adminKey: j.adminKey, scorerCode: j.scorerCode, title: $('title').value || 'Jogo da semana', at: Date.now() })); } catch (e) {}
+      location.href = '/s/' + j.code + '?novo=1';
+    }).catch(function (e) { err.textContent = e.message; btn.disabled = false; });
+  };
+
+  // minhas salas (só neste aparelho)
+  var list = [];
+  try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k.indexOf('rab_room_') === 0) { var d = JSON.parse(localStorage.getItem(k)); list.push({ code: k.slice(9), title: d.title || 'Jogo', at: d.at || 0 }); } } } catch (e) {}
+  list.sort(function (a, b) { return b.at - a.at; });
+  if (list.length) {
+    $('mine').classList.remove('hide');
+    $('mineList').innerHTML = list.slice(0, 6).map(function (r) { return '<a href="/s/' + esc(r.code) + '"><span>' + esc(r.title) + '<br><small>Sala do organizador</small></span><b>' + esc(r.code) + '</b></a>'; }).join('');
+  }
+})();
+</script>
+</body>
+</html>
