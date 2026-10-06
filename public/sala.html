@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>__TITLE__</title>
 <meta property="og:title" content="__TITLE__">
-<meta property="og:description" content="Entre na sala do jogo: placar ao vivo, votação do craque e do bagre e mural da resenha.">
+<meta property="og:description" content="Entre na sala do jogo: escolha seu time, acompanhe o placar e resenhe.">
 <meta property="og:image" content="__ORIGIN__/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#09090b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -128,6 +131,31 @@
   .qrbox { background:#fff; border-radius:12px; padding:8px; width:150px; margin:10px auto; } .qrbox img { width:100%; display:block; }
   .lnk { word-break:break-all; font-size:13px; background:#0d0d0f; border:1px solid var(--line); border-radius:10px; padding:10px; margin:6px 0; color:#d8d6ce; }
   #cardimg { width:100%; border-radius:14px; border:1px solid var(--line); margin-top:10px; }
+  /* ===== v2: sala aberta ===== */
+  .sbtn.ic { padding:8px 14px; font-size:18px; line-height:1; }
+  .lk { display:block; width:100%; margin-top:8px; background:none; border:0; color:var(--mut); font-size:13px; text-decoration:underline; cursor:pointer; font-family:inherit; padding:6px; }
+  @media (max-width:430px) { .brand b { font-size:19px !important; letter-spacing:1px !important; } .bw small { display:none; } .sbtn { padding:8px 10px; font-size:12px; } .sbtn.ic { padding:8px 12px; } .brand img { height:42px; } }
+  .sech { font-family:var(--num); font-size:26px; letter-spacing:1px; text-transform:uppercase; font-weight:800; margin:22px 0 10px; display:flex; align-items:center; gap:12px; }
+  .sech::after { content:""; flex:1; height:8px; background:linear-gradient(var(--amber) 0 3px,transparent 3px 5px,var(--amber) 5px 8px); opacity:.5; }
+  .dot { display:inline-block; width:12px; height:12px; border-radius:50%; flex:none; } .dot.a { background:var(--ta); } .dot.b { background:var(--tb); }
+  .tgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .tcol { background:var(--card); border:1px solid var(--line); border-top:4px solid var(--ta); border-radius:14px; padding:12px 10px; min-width:0; }
+  .tcol.b { border-top-color:var(--tb); }
+  .tcol h3 { display:flex; align-items:center; gap:8px; margin:0 0 8px; font-family:var(--num); font-size:21px; letter-spacing:.8px; text-transform:uppercase; font-weight:800; } .tcol h3 b { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:800; } .tcol h3 small { margin-left:auto; color:var(--mut); font-family:system-ui,sans-serif; font-size:13px; }
+  .pl { display:flex; align-items:center; justify-content:space-between; gap:6px; width:100%; text-align:left; padding:10px 8px; margin:0; border:0; border-top:1px solid #ffffff12; background:none; color:var(--txt); font-size:15px; font-family:inherit; cursor:pointer; border-radius:8px; }
+  .pl:first-of-type { border-top:0; } .pl:active { background:#ffffff0d; } .pl span { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .pl i { font-style:normal; font-size:11px; font-weight:800; color:var(--amber); letter-spacing:.5px; text-transform:uppercase; } .pl em { font-style:normal; font-size:13px; opacity:.8; }
+  .me { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .tg { display:inline-block; padding:2px 10px; border-radius:99px; font-weight:800; font-size:13px; } .tg.a { background:#0c2833; color:#7dd3fc; } .tg.b { background:#3a1119; color:#fda4af; }
+  .jgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+  .jbtn { border:2px solid; border-radius:16px; padding:14px 6px 12px; color:#fff; cursor:pointer; font-family:var(--num); text-transform:uppercase; font-weight:800; min-width:0; }
+  .jbtn small { display:block; font-size:13px; letter-spacing:1.5px; opacity:.85; font-weight:700; } .jbtn b { display:block; font-size:26px; line-height:1.05; margin-top:3px; overflow:hidden; text-overflow:ellipsis; }
+  .jbtn.a { background:#0c2833; border-color:var(--ta); } .jbtn.b { background:#3a1119; border-color:var(--tb); } .jbtn:active { transform:scale(.97); }
+  .mi { display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:15px 6px; background:none; border:0; border-top:1px solid #ffffff12; color:var(--txt); font-size:16px; font-family:inherit; cursor:pointer; }
+  .mi:first-of-type { border-top:0; } .mi span { width:28px; text-align:center; font-size:20px; } .mi.red { color:#fca5a5; }
+  .hist .h { padding:8px 0; border-top:1px solid #ffffff12; font-size:13.5px; color:#d8d6ce; line-height:1.4; } .hist .h:first-child { border-top:0; } .hist .h b { color:var(--amber); } .hist .h small { color:var(--mut); }
+  .grp { display:flex; align-items:center; gap:8px; margin:10px 0 6px; font-weight:700; font-size:13px; color:var(--mut); text-transform:uppercase; letter-spacing:1px; }
+  .ctlnote { text-align:center; font-weight:700; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -138,12 +166,12 @@
 <div class="topstripe"></div>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="/"><img src="/logo.png" alt="Rabugentos"><span class="bw"><b>RABUGENTOS</b><small>Futebol e resenha</small></span></a>
-    <div class="acts"><button class="sbtn" id="btnShare">Compartilhar</button></div>
+    <a class="brand" id="brand" href="/"><img src="/logo.png" alt="Rabugentos"><span class="bw"><b>RABUGENTOS</b><small>Futebol e resenha</small></span></a>
+    <div class="acts"><button class="sbtn" id="btnInvite">Convidar</button><button class="sbtn ic" id="btnMenu" aria-label="Menu">⋯</button></div>
   </header>
 
   <div id="gone" class="hide card" style="text-align:center;margin-top:30px">
-    <h3 style="font-size:20px">Sala não encontrada</h3>
+    <h3 style="font-size:24px">Sala não encontrada</h3>
     <p class="empty" style="padding:8px 0">Esta sala não existe ou já expirou. Salas somem sozinhas depois de alguns dias.</p>
     <div id="restoreBox" class="hide"><div class="hint" id="restoreMsg" style="margin-bottom:10px"></div><button class="btn ok" id="btnRestore">Restaurar a sala deste aparelho</button><div class="gap"></div></div>
     <a class="btn sec" href="/" style="text-decoration:none">Voltar ao início</a>
@@ -151,19 +179,18 @@
 
   <div id="app" class="hide">
     <section class="hero">
-      <div style="text-align:center;margin-bottom:6px"><span class="badge2 hide" id="role"></span></div>
       <h1 id="title">—</h1>
       <div class="sub" id="when">—</div>
       <div class="sub" id="fmt" style="margin-top:2px">—</div>
       <div class="sb">
-        <div class="tm"><div class="dot" style="background:var(--ta)"></div><b id="na">—</b></div>
+        <div class="tm"><div class="dot a" style="width:14px;height:14px;margin:0 auto 8px;box-shadow:0 0 0 4px #ffffff10"></div><b id="na">—</b></div>
         <div class="score" id="score">0 x 0</div>
-        <div class="tm"><div class="dot" style="background:var(--tb)"></div><b id="nb">—</b></div>
+        <div class="tm"><div class="dot b" style="width:14px;height:14px;margin:0 auto 8px;box-shadow:0 0 0 4px #ffffff10"></div><b id="nb">—</b></div>
       </div>
       <div class="mid2">
         <div class="clock" id="clock">00:00</div>
         <span class="pill pre" id="pill">Antes do jogo</span>
-        <div class="over hide" id="over">⏱ Tempo esgotado — o organizador encerra o jogo</div>
+        <div class="over hide" id="over">⏱ Tempo esgotado — encerre o jogo quando acabar</div>
       </div>
       <div class="strip"><div>👥 <b id="viewers">0</b> na sala</div><div id="goalsCount"></div></div>
     </section>
@@ -171,111 +198,42 @@
 
     <nav class="tabs">
       <button class="tab on" data-p="p-game">Jogo</button>
-      <button class="tab" data-p="p-vote">Votação</button>
-      <button class="tab" data-p="p-wall">Mural <span id="ccount"></span></button>
-      <button class="tab" data-p="p-org">⚙️</button>
+      <button class="tab" data-p="p-teams">Times</button>
+      <button class="tab" data-p="p-res">Resenha <span id="ccount"></span></button>
     </nav>
 
     <!-- JOGO -->
     <section class="panel on" id="p-game">
-      <details id="scorerBox" class="hide">
-        <summary>🧤 Sou goleiro ou marcador oficial</summary>
-        <div class="hint" style="margin:0 0 8px">Digite o código de marcador que o organizador enviou para poder marcar gols.</div>
-        <div class="row2"><input type="text" id="scCode" placeholder="CÓDIGO" maxlength="8" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:3px;text-align:center"><button class="btn sec" id="btnScorer" style="padding:0">Entrar</button></div>
-      </details>
-      <div id="quickCtl" class="card qc hide"><div class="grid"><button class="btn" id="qcMain" data-ctl="start">—</button><button class="btn sec" id="qcPause" data-ctl="pause">—</button></div></div>
+      <div id="quickCtl" class="card qc hide">
+        <div class="grid" id="qcGrid"><button class="btn" id="qcMain" data-ctl="start">—</button><button class="btn sec" id="qcPause" data-ctl="pause">—</button></div>
+        <button class="lk hide" id="qcUndo" data-ctl="undo_phase">—</button>
+      </div>
       <div id="goals"></div>
+      <details id="histBox" style="margin-top:6px"><summary>🕘 Histórico: quem fez o quê</summary><div class="hist" id="hist"></div></details>
       <button class="btn sec gap" id="btnCard">🖼️ Gerar cartão da noite</button>
     </section>
 
-    <!-- VOTAÇÃO -->
-    <section class="panel" id="p-vote"><div id="votes"></div></section>
+    <!-- TIMES -->
+    <section class="panel" id="p-teams">
+      <div class="card me" id="meBox"></div>
+      <div class="tgrid" id="teams"></div>
+      <div class="hint" style="text-align:center;margin:10px 0">Toque em um nome para mover de time, renomear ou tirar. Quem não tem celular? Use <b>+ jogador</b> no time dele.</div>
+      <button class="btn sec" id="btnShuffle">🎲 Sortear times</button>
+    </section>
 
-    <!-- MURAL -->
-    <section class="panel" id="p-wall">
+    <!-- RESENHA -->
+    <section class="panel" id="p-res">
+      <div class="sech" style="margin-top:4px">Votação</div>
+      <div class="card" id="voteCtl"></div>
+      <div id="votes"></div>
+      <div class="sech">Mural</div>
       <div class="card" id="wallForm">
-        <div class="row2"><input type="text" id="wName" maxlength="30" placeholder="Seu apelido"><div></div></div>
-        <div class="gap"></div>
-        <div style="display:flex;gap:8px"><input type="text" id="wText" maxlength="200" placeholder="Escreva sua resenha…"><button class="btn" id="wSend" style="width:auto;padding:0 18px">Enviar</button></div>
+        <input type="text" id="wText" maxlength="200" placeholder="Escreva sua resenha…" style="margin-bottom:8px">
+        <button class="btn" id="wSend">Enviar</button>
         <div class="quick" id="quick"></div>
         <div class="hint" id="wMsg"></div>
       </div>
-      <div id="wallClosed" class="empty hide">O mural está fechado no momento.</div>
       <div id="comments"></div>
-    </section>
-
-    <!-- ORGANIZADOR -->
-    <section class="panel" id="p-org">
-      <div id="orgLogin" class="card">
-        <h3>Área do organizador</h3>
-        <div class="hint" style="margin:0 0 8px">Cole a chave do organizador (ela está no link do organizador que você guardou).</div>
-        <input type="password" id="admKey" placeholder="Chave do organizador" autocomplete="off">
-        <button class="btn gap" id="btnAdm">Entrar</button>
-      </div>
-      <div id="orgPanel" class="hide">
-        <button class="btn sec" id="btnInvite" style="margin-bottom:10px">📲 Convidar (links e QR Code)</button>
-
-        <details open>
-          <summary>🎮 Controle do jogo</summary>
-          <div class="grid" id="ctrl"></div>
-          <label>Corrigir relógio (com o jogo em andamento)</label>
-          <div class="grid"><input type="number" id="adjMin" min="0" max="240" placeholder="minutos"><input type="number" id="adjSec" min="0" max="59" placeholder="segundos"></div>
-          <button class="btn sec gap" id="btnAdj">Ajustar relógio</button>
-          <button class="btn warn gap" id="btnReset">Zerar o jogo (apaga gols e votos)</button>
-        </details>
-
-        <details>
-          <summary>⚙️ Configuração do jogo</summary>
-          <label for="cTitle">Nome do jogo</label><input type="text" id="cTitle" maxlength="40">
-          <div class="row2"><div><label for="cDate">Data</label><input type="date" id="cDate"></div><div><label for="cVenue">Campo</label><input type="text" id="cVenue" maxlength="60"></div></div>
-          <div class="row2"><div><label for="cA">Time A</label><input type="text" id="cA" maxlength="24"></div><div><label for="cB">Time B</label><input type="text" id="cB" maxlength="24"></div></div>
-          <label for="cPreset">Formato</label>
-          <select id="cPreset"><option value="2x30">2 tempos de 30 min</option><option value="1x60">1 tempo de 60 min</option><option value="1x40">1 tempo de 40 min</option><option value="custom">Personalizado</option><option value="noclock">Sem relógio</option></select>
-          <div class="row2 hide" id="cCustom"><div><label for="cHalves">Tempos</label><select id="cHalves"><option value="1">1 tempo</option><option value="2">2 tempos</option></select></div><div><label for="cMin">Minutos por tempo</label><input type="number" id="cMin" min="1" max="120"></div></div>
-          <button class="btn ok gap" id="btnSetup">Salvar configuração</button>
-        </details>
-
-        <details>
-          <summary>👥 Jogadores do jogo</summary>
-          <div class="hint" style="margin:6px 0">Um nome por linha. Eles aparecem na hora de marcar gols e nas votações. Quem marca gol com nome novo é adicionado sozinho.</div>
-          <textarea id="cRoster" placeholder="Beto&#10;Zé&#10;Carlão"></textarea>
-          <button class="btn ok gap" id="btnRoster">Salvar jogadores</button>
-        </details>
-
-        <details>
-          <summary>⚽ Quem pode marcar gols</summary>
-          <div class="hint">Código de marcador (para goleiros e para o espectador oficial):</div>
-          <div class="code" id="scorerCode">—</div>
-          <div class="grid"><button class="btn sec" id="btnCopyScorer">Copiar convite</button><button class="btn sec" id="btnNewCode">Gerar novo código</button></div>
-          <div class="sw"><span>Qualquer pessoa da sala pode marcar</span><button class="btn sm sec" id="btnOpenScoring">—</button></div>
-          <div class="hint">Com mais de um marcador, o app pergunta "é o mesmo gol?" quando dois gols do mesmo time chegam em menos de 1 minuto.</div>
-        </details>
-
-        <details>
-          <summary>🗳️ Votação da resenha</summary>
-          <div class="hint" id="voteInfo" style="margin:6px 0"></div>
-          <div class="grid"><button class="btn sec" id="btnVoteToggle">—</button><button class="btn" id="btnReveal">🎉 Revelar resultado</button></div>
-          <button class="btn sec gap" id="btnVoteReset">Zerar votos</button>
-        </details>
-
-        <details>
-          <summary>💬 Mural</summary>
-          <div class="sw"><span>Mural aberto para comentários</span><button class="btn sm sec" id="btnWall">—</button></div>
-          <div class="sw"><span>Filtro de palavrões</span><button class="btn sm sec" id="btnFilter">—</button></div>
-          <div class="hint">Para apagar um comentário, abra a aba Mural: você verá o botão ✕ em cada um.</div>
-        </details>
-
-        <details>
-          <summary>🗓️ Sala e backup</summary>
-          <div class="hint" id="storageInfo" style="margin:6px 0;font-size:13px"></div>
-          <div class="hint" id="expInfo" style="margin:6px 0"></div>
-          <button class="btn sec" id="btnExtend">+2 dias de duração</button>
-          <button class="btn sec gap" id="btnBackup">Baixar backup da sala</button>
-          <div class="hint">O seu celular guarda uma cópia sozinho a cada 30 s. Se o servidor reiniciar e a sala sumir, aparece um botão para restaurar.</div>
-          <button class="btn warn gap" id="btnDelete">Apagar a sala agora</button>
-          <button class="btn sec gap" id="btnLogout">Sair da área do organizador</button>
-        </details>
-      </div>
     </section>
   </div>
 </div>
@@ -290,52 +248,90 @@
   <div class="grid"><button class="btn sec" id="dupSame">É o mesmo gol</button><button class="btn" id="dupDiff">É outro gol</button></div>
 </div>
 <div class="fab" id="fab"><div class="fabrow">
-  <button class="qg a" id="qA"><small>⚽ GOL</small><b id="qAn">Time A</b></button>
-  <button class="qg b" id="qB"><small>⚽ GOL</small><b id="qBn">Time B</b></button>
+  <button class="qg a" id="qA"><small>⚽ GOL</small><b id="qAn">Azul</b></button>
+  <button class="qg b" id="qB"><small>⚽ GOL</small><b id="qBn">Laranja</b></button>
   <button class="qmore" id="btnGoal" aria-label="Mais opções (gol contra, escolher jogador)">⋯</button>
 </div></div>
 
-<!-- Modal: apelido (só na primeira vez) -->
-<div class="modal" id="mNick"><div class="sheet">
-  <h2>Quem está anotando?</h2>
-  <div class="hint">Seu apelido aparece junto de cada gol que você marcar. Eu só pergunto uma vez.</div>
-  <input type="text" id="nickIn" maxlength="30" placeholder="Seu apelido" style="margin-top:12px">
-  <button class="btn gap" id="nickOk">Salvar e continuar</button>
+<!-- Entrar na sala -->
+<div class="modal" id="mWelcome"><div class="sheet">
+  <h2 id="wTitle">Entrar na sala</h2>
+  <div class="hint" id="wSub">Escolha seu apelido e o seu time. Leva 5 segundos.</div>
+  <label for="wNick">Seu apelido</label>
+  <input type="text" id="wNick" maxlength="30" placeholder="Como te chamam no jogo?" autocomplete="nickname">
+  <div class="jgrid">
+    <button class="jbtn a" data-join="a"><small>Sou do</small><b id="wA">Azul</b></button>
+    <button class="jbtn b" data-join="b"><small>Sou do</small><b id="wB">Laranja</b></button>
+  </div>
+  <button class="btn sec gap" data-join="watch">👀 Só assisto</button>
 </div></div>
 
-<!-- Modal: marcar gol -->
+<!-- Marcar gol (detalhado) -->
 <div class="modal" id="mGoal"><div class="sheet">
   <h2>⚽ Marcar gol</h2>
-  <div class="tpick"><button class="tp a" id="tpA" data-t="a">Time A</button><button class="tp b" id="tpB" data-t="b">Time B</button></div>
+  <div class="tpick"><button class="tp a" id="tpA" data-t="a">Azul</button><button class="tp b" id="tpB" data-t="b">Laranja</button></div>
   <label for="gPlayer">Quem fez</label>
   <select id="gPlayer"></select>
-  <input type="text" id="gOther" maxlength="40" placeholder="Nome do jogador" class="hide" style="margin-top:8px">
-  <label><input type="checkbox" id="gOwn"> Gol contra (o gol vale para o time escolhido)</label>
-  <div id="gNickBox" class="hide"><label for="gNick">Seu apelido (quem está anotando)</label><input type="text" id="gNick" maxlength="30"></div>
-  <div id="gConfirm" class="confirmbox hide"></div>
-  <div class="grid gap" id="gBtns"><button class="btn sec" id="gCancel">Cancelar</button><button class="btn" id="gSend">Registrar gol</button></div>
-  <div class="grid gap hide" id="gBtns2"><button class="btn sec" id="gSame">É o mesmo gol</button><button class="btn" id="gDiff">É outro gol</button></div>
+  <input type="text" id="gOther" maxlength="30" placeholder="Nome do jogador" class="hide" style="margin-top:8px">
+  <label><input type="checkbox" id="gOwn"> Gol contra (o gol vale para o time escolhido; escolha o jogador do time adversário)</label>
+  <div class="grid gap"><button class="btn sec" id="gCancel">Cancelar</button><button class="btn" id="gSend">Registrar gol</button></div>
 </div></div>
 
-<!-- Modal: convidar -->
+<!-- Menu -->
+<div class="modal" id="mMenu"><div class="sheet">
+  <h2>Menu da sala</h2>
+  <button class="mi" id="miInvite"><span>📲</span>Convidar (link e QR Code)</button>
+  <button class="mi" id="miConfig"><span>⚙️</span>Nome do jogo, times e formato</button>
+  <button class="mi" id="miCard"><span>🖼️</span>Cartão da noite (imagem)</button>
+  <button class="mi" id="miBackup"><span>💾</span>Baixar backup da sala</button>
+  <button class="mi" id="miExtend"><span>⏳</span>Ficar mais 2 dias no ar</button>
+  <button class="mi" id="miReset"><span>🔄</span>Zerar o jogo (apaga gols e votos)</button>
+  <button class="mi red" id="miDelete"><span>🗑️</span>Apagar a sala</button>
+  <button class="mi" id="miLeave"><span>🚪</span>Sair da sala</button>
+  <div class="hint" id="storageInfo" style="margin-top:10px;font-size:13px"></div>
+  <button class="btn sec gap" id="menuClose">Fechar</button>
+</div></div>
+
+<!-- Configurar -->
+<div class="modal" id="mConfig"><div class="sheet">
+  <h2>⚙️ Configurar o jogo</h2>
+  <label for="cTitle">Nome do jogo</label><input type="text" id="cTitle" maxlength="40">
+  <div class="row2"><div><label for="cA">Time 1</label><input type="text" id="cA" maxlength="24"></div><div><label for="cB">Time 2</label><input type="text" id="cB" maxlength="24"></div></div>
+  <div class="row2"><div><label for="cDate">Data</label><input type="date" id="cDate"></div><div><label for="cVenue">Campo</label><input type="text" id="cVenue" maxlength="60"></div></div>
+  <label for="cPreset">Formato</label>
+  <select id="cPreset"><option value="2x30">2 tempos de 30 min</option><option value="1x60">1 tempo de 60 min</option><option value="1x40">1 tempo de 40 min</option><option value="custom">Personalizado</option><option value="noclock">Sem relógio</option></select>
+  <div class="row2 hide" id="cCustom"><div><label for="cHalves">Tempos</label><select id="cHalves"><option value="1">1 tempo</option><option value="2">2 tempos</option></select></div><div><label for="cMin">Minutos por tempo</label><input type="number" id="cMin" min="1" max="120"></div></div>
+  <div class="grid gap"><button class="btn sec" id="cCancel">Cancelar</button><button class="btn" id="cSave">Salvar</button></div>
+</div></div>
+
+<!-- Adicionar / renomear jogador -->
+<div class="modal" id="mAdd"><div class="sheet">
+  <h2 id="addTitle">+ Jogador</h2>
+  <div class="hint" id="addSub">Para quem está sem celular: digite o nome.</div>
+  <input type="text" id="addName" maxlength="30" placeholder="Nome do jogador" style="margin-top:12px">
+  <div class="grid gap"><button class="btn sec" id="addCancel">Cancelar</button><button class="btn" id="addOk">Salvar</button></div>
+</div></div>
+
+<!-- Ações com um jogador -->
+<div class="modal" id="mPlayer"><div class="sheet">
+  <h2 id="plName">Jogador</h2>
+  <button class="mi" id="plMove"><span>↔️</span><b id="plMoveTx">Mover de time</b></button>
+  <button class="mi" id="plRename"><span>✏️</span>Renomear</button>
+  <button class="mi red" id="plRemove"><span>🗑️</span>Tirar da sala</button>
+  <button class="btn sec gap" id="plClose">Fechar</button>
+</div></div>
+
+<!-- Convidar -->
 <div class="modal" id="mInvite"><div class="sheet">
-  <h2>📲 Convide a galera</h2>
-  <div class="hint" style="margin:0 0 6px">Mande no grupo do WhatsApp:</div>
+  <h2>📲 Chame a galera</h2>
+  <div class="hint" style="margin:0 0 6px">Um link só: quem abrir escolhe o apelido e o time.</div>
   <div class="lnk" id="lnkFriends"></div>
   <div class="grid"><button class="btn sec" id="cpFriends">Copiar</button><button class="btn ok" id="waFriends">WhatsApp</button></div>
   <div class="qrbox"><img id="qrImg" alt="QR Code da sala"></div>
-  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
-  <div class="hint">Link para <b>marcadores</b> (goleiros e espectador oficial): quem abrir já entra podendo marcar gols.</div>
-  <div class="lnk" id="lnkScorers"></div>
-  <div class="grid"><button class="btn sec" id="cpScorers">Copiar</button><button class="btn ok" id="waScorers">WhatsApp</button></div>
-  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
-  <div class="hint">⚠️ <b>Link do organizador</b> — guarde só para você. Quem tiver este link controla a sala.</div>
-  <div class="lnk" id="lnkAdmin"></div>
-  <button class="btn sec" id="cpAdmin">Copiar link do organizador</button>
   <button class="btn gap" id="invClose">Fechar</button>
 </div></div>
 
-<!-- Modal: cartão da noite -->
+<!-- Cartão da noite -->
 <div class="modal" id="mCard"><div class="sheet">
   <h2>🖼️ Cartão da noite</h2>
   <div class="hint">Salve ou envie no grupo. Como a sala some, esta imagem é a lembrança do jogo.</div>
@@ -344,51 +340,49 @@
   <button class="btn sec gap" id="cardClose">Fechar</button>
 </div></div>
 
+<!-- Sair? -->
+<div class="modal" id="mLeave"><div class="sheet">
+  <h2>Sair da sala?</h2>
+  <div class="hint">Nada se perde: a sala continua no ar e você volta pelo mesmo link (ou em "Minhas salas").</div>
+  <div class="grid gap"><button class="btn" id="leaveStay">Ficar</button><button class="btn sec" id="leaveGo">Sair</button></div>
+</div></div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var CODE = (location.pathname.split('/')[2] || '').toUpperCase();
-  var LSR = 'rab_room_' + CODE, LSG = 'rab_goals_' + CODE, LSB = 'rab_backup_' + CODE;
-  var R = null, recv = 0, creds = {}, isAdmin = false, isScorer = false, myVotes = {}, cfgFilled = false, seenGoals = null, lastScore = '', rosterFilled = false;
-  var gTeam = null, socket = null;
+  var R = null, recv = 0, ME = null, myVotes = {}, seenGoals = null, lastScore = '', leaving = false, tab = 'p-game';
+  var afterId = null, afterTimer = null, dupTeam = null, goalTeam = null, addMode = null, plSel = null, newRoom = false, socket = null, wl = null, cardBlob = null;
 
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
   function jparse(s, d) { try { return s ? JSON.parse(s) : d; } catch (e) { return d; } }
   function uuid() { var a = new Uint8Array(12); (window.crypto || window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a, function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  function vibrate(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
 
   var CID = ls('rab_cid') || (function () { var c = uuid(); ls('rab_cid', c); return c; })();
   var NICK = ls('rab_nick') || '';
-  creds = jparse(ls(LSR), {});
-
-  // links com #adm=... / #sc=... guardam as credenciais e limpam o endereço
-  (function () {
-    var h = location.hash.replace(/^#/, ''); if (!h) return;
-    var p = {}; h.split('&').forEach(function (kv) { var s = kv.split('='); p[s[0]] = decodeURIComponent(s[1] || ''); });
-    if (p.adm) creds.adminKey = p.adm; if (p.sc) creds.scorerCode = p.sc.toUpperCase();
-    if (p.adm || p.sc) { ls(LSR, JSON.stringify(creds)); history.replaceState(null, '', location.pathname + location.search); }
-  })();
+  var LSME = 'rab_me_' + CODE, LSB = 'rab_backup_' + CODE, LSMADE = 'rab_made_' + CODE;
+  newRoom = new URLSearchParams(location.search).get('novo') === '1';
 
   var toastT;
   function toast(m, err) { var t = $('toast'); t.textContent = m; t.className = err ? 'err' : ''; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(function () { t.style.display = 'none'; }, 2600); }
 
-  function post(path, body) {
-    return fetch('/api/rooms/' + CODE + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }); });
+  // ---------------- chamadas ao servidor (qualquer pessoa da sala pode tudo)
+  function act(body) {
+    body.clientId = CID; body.nickname = NICK;
+    return fetch('/api/rooms/' + CODE + '/do', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j && j.gone) showGone(); return j; })
+      .catch(function () { return { ok: false, error: 'Sem conexão. Tente de novo.' }; });
   }
-  function adm(body) {
-    body.adminKey = creds.adminKey;
-    return post('/admin', body).then(function (j) {
-      if (j._status === 401) { creds.adminKey = ''; ls(LSR, JSON.stringify(creds)); isAdmin = false; render(); throw new Error(j.error); }
-      if (!j.ok) throw new Error(j.error || 'Erro');
-      if (j.room) apply(j.room);
-      scheduleBackup();
-      return j;
-    });
+  var NO_NICK = { react: 1, vote: 1, comment_delete: 1, ping: 1 };
+  function run(body, okMsg) {
+    if (!NICK && !NO_NICK[body.action]) { openWelcome(); return Promise.resolve({ ok: false, error: 'Digite seu apelido.' }); }
+    return act(body).then(function (j) { if (!j.ok && !j.needConfirm) toast(j.error || 'Erro', true); else if (okMsg) toast(okMsg); return j; });
   }
-  function actAdm(body, msg) { return adm(body).then(function (j) { if (msg) toast(msg); return j; }).catch(function (e) { toast(e.message, true); throw e; }); }
 
   // ---------------- tempo
   function seconds() { if (!R) return 0; var t = R.clock.seconds; if (R.clock.running) t += Math.floor((Date.now() - recv) / 1000); return t; }
@@ -408,12 +402,10 @@
     return s + (v ? (s ? ' · ' : '') + '📍 ' + v : '');
   }
   function formatLabel(f) { return !f.clock ? 'sem relógio' : (f.halves === 2 ? '2 tempos de ' + f.minutes + ' min' : '1 tempo de ' + f.minutes + ' min'); }
-
-  // ---------------- renderização
-  function teamName(k) { return R.teams[k]; }
-  function mine() { return jparse(ls(LSG), []); }
+  function tn(k) { return R.teams[k]; }
   function setHtml(el, html) { if (el.__h !== html) { el.__h = html; el.innerHTML = html; } }
 
+  // ---------------- renderização
   function renderHero() {
     $('title').textContent = R.title; $('when').textContent = fmtWhen(R.date, R.venue); $('fmt').textContent = '⏱ ' + formatLabel(R.format);
     $('na').textContent = R.teams.a; $('nb').textContent = R.teams.b;
@@ -421,385 +413,330 @@
     if (lastScore && lastScore !== sc) { var e = $('score'); e.classList.remove('pulse'); void e.offsetWidth; e.classList.add('pulse'); } lastScore = sc;
     var p = $('pill'), paused = R.statusLabel === 'Jogo parado'; p.textContent = R.statusLabel; p.className = 'pill ' + (paused ? 'paused' : R.status);
     $('viewers').textContent = R.viewers;
-    var n = R.goals.filter(function (g) { return g.status !== 'annulled'; }).length; $('goalsCount').textContent = n ? '⚽ ' + n + (n > 1 ? ' gols' : ' gol') : '';
+    var n = R.goals.length; $('goalsCount').textContent = n ? '⚽ ' + n + (n > 1 ? ' gols' : ' gol') : '';
     var d = (R.expiresAt - Date.now()) / 86400000;
     $('expiry').textContent = d < 1 ? '⏳ Esta sala some hoje — gere o cartão da noite!' : '⏳ Esta sala some em ' + Math.ceil(d) + ' dia' + (Math.ceil(d) > 1 ? 's' : '') + ' — nada fica guardado depois disso.';
     document.title = R.title + ' · ' + sc;
     renderClock();
   }
 
+  function renderQuick() {
+    var q = $('quickCtl'), f = R.format, s = R.status, undo = R.undoPhase.available;
+    if (s === 'finished' && !undo) { q.classList.add('hide'); return; }
+    var main, act2;
+    if (s === 'pre') { main = '▶️ Começar o jogo'; act2 = 'start'; }
+    else if (s === 'h1' && f.halves === 2) { main = '⏸️ Intervalo'; act2 = 'break'; }
+    else if (s === 'break') { main = '▶️ Começar 2º tempo'; act2 = 'second'; }
+    else if (s === 'finished') { main = null; }
+    else { main = '⏹️ Encerrar jogo'; act2 = 'finish'; }
+    var clk = f.clock && (s === 'h1' || s === 'h2');
+    $('qcMain').classList.toggle('hide', !main); if (main) { $('qcMain').textContent = main; $('qcMain').dataset.ctl = act2; }
+    $('qcPause').classList.toggle('hide', !clk);
+    if (clk) { $('qcPause').textContent = R.clock.running ? '⏸️ Parar relógio' : '▶️ Retomar relógio'; $('qcPause').dataset.ctl = R.clock.running ? 'pause' : 'resume'; }
+    $('qcGrid').style.gridTemplateColumns = (main && clk) ? '1fr 1fr' : '1fr'; $('qcGrid').classList.toggle('hide', !main && !clk);
+    $('qcUndo').classList.toggle('hide', !undo); if (undo) $('qcUndo').textContent = '↩ Foi sem querer? Desfazer: ' + R.undoPhase.label;
+    q.classList.remove('hide');
+  }
+
   function renderGoals() {
-    var my = mine();
     var html = R.goals.slice().reverse().map(function (g) {
-      var nm = esc(teamName(g.team)), pl = g.player ? esc(g.player) : '';
+      var nm = esc(tn(g.team)), pl = g.player ? esc(g.player) : '';
       var title = g.ownGoal ? 'Gol contra a favor do ' + nm : 'GOL do ' + nm;
-      var sub = (g.ownGoal ? (pl ? 'Gol contra de ' + pl + ' · ' : '') : (pl ? pl + ' · ' : '')) + 'anotado por ' + esc(g.by) + (g.minute ? ' · ' + g.minute + "'" : '') + ' · ' + ago(g.ts);
-      var tag = g.status === 'contested' ? '<div class="tag">🚨 VAR em análise' + (g.varCount > 1 ? ' (' + g.varCount + ')' : '') + '</div>' : (g.status === 'annulled' ? '<div class="tag red">Gol anulado</div>' : '');
-      var btns = '';
-      if (g.status !== 'annulled' && !g.locked) btns += '<button class="btn sm sec" data-var="' + g.id + '">🚨 VAR</button>';
-      if (my.indexOf(g.id) !== -1 || isAdmin) btns += '<button class="btn sm sec" data-undo="' + g.id + '">Desfazer</button>';
-      if (isAdmin && g.status === 'contested') btns += '<button class="btn sm ok" data-res="validate:' + g.id + '">Validar</button><button class="btn sm warn" data-res="annul:' + g.id + '">Anular</button>';
-      return '<div class="goal ' + g.team + (g.status === 'annulled' ? ' annulled' : '') + '"><div class="ic">' + (g.ownGoal ? '🤦' : '⚽') + '</div><div class="tx"><b>' + title + '</b><span>' + sub + '</span>' + tag + (btns ? '<div class="gbtns">' + btns + '</div>' : '') + '</div></div>';
+      var sub = (g.ownGoal ? (pl ? 'Gol contra de ' + pl + ' · ' : '') : (pl ? '<b style="color:var(--txt)">' + pl + '</b> · ' : '')) + 'anotado por ' + esc(g.by) + (g.minute ? ' · ' + g.minute + "'" : '') + ' · ' + ago(g.ts);
+      return '<div class="goal ' + g.team + '"><div class="ic">' + (g.ownGoal ? '🤦' : '⚽') + '</div><div class="tx"><b>' + title + '</b><span>' + sub + '</span><div class="gbtns"><button class="btn sm sec" data-undo="' + g.id + '">Desfazer</button></div></div></div>';
     }).join('');
-    setHtml($('goals'), html || '<div class="empty">Nenhum gol ainda.<br>Quando sair, aparece aqui na hora para todo mundo.</div>');
+    setHtml($('goals'), html || '<div class="empty">Nenhum gol ainda.<br>Toque no botão do seu time, lá embaixo, quando sair.</div>');
+    setHtml($('hist'), R.log.length ? R.log.slice().reverse().slice(0, 25).map(function (l) { return '<div class="h"><b>' + esc(l.who) + '</b> ' + esc(l.text) + ' <small>· ' + ago(l.ts) + '</small></div>'; }).join('') : '<div class="hint">Nada por aqui ainda.</div>');
+  }
+
+  function playersOf(k) { return R.players.filter(function (p) { return p.team === k; }); }
+  function renderTeams() {
+    var me = ME ? '<div>Você: <b>' + esc(ME.name) + '</b> · <span class="tg ' + ME.team + '">' + esc(tn(ME.team)) + '</span></div><button class="btn sm sec" id="meChange">Mudar</button>'
+      : '<div>' + (NICK ? '<b>' + esc(NICK) + '</b>, você está só assistindo.' : 'Você ainda não entrou num time.') + '</div><button class="btn sm" id="meChange">Entrar num time</button>';
+    setHtml($('meBox'), me);
+    setHtml($('teams'), ['a', 'b'].map(function (k) {
+      var list = playersOf(k);
+      var rows = list.map(function (p) { return '<button class="pl" data-pl="' + p.id + '"><span>' + esc(p.name) + (ME && ME.id === p.id ? ' <i>você</i>' : '') + '</span>' + (p.phone ? '' : '<em title="sem celular">📵</em>') + '</button>'; }).join('')
+        || '<div class="hint" style="padding:8px 4px">Ninguém ainda.</div>';
+      return '<div class="tcol ' + k + '"><h3><span class="dot ' + k + '"></span><b>' + esc(tn(k)) + '</b><small>' + list.length + '</small></h3>' + rows + '<button class="btn sm sec" style="width:100%;margin-top:8px" data-addteam="' + k + '">+ jogador</button></div>';
+    }).join(''));
+    $('btnShuffle').disabled = R.players.length < 2;
   }
 
   function renderVotes() {
-    var v = R.votes, html = '';
-    if (!R.roster.length) { setHtml($('votes'), '<div class="empty">O organizador ainda não cadastrou os jogadores do jogo.<br>Assim que cadastrar, a votação aparece aqui.</div>'); return; }
-    var state = v.revealed ? '🎉 Resultado revelado!' : (v.open ? '🗳️ Votação aberta — toque no seu voto' : '⏳ Votação ainda não aberta. Aguarde o organizador.');
-    html += '<div class="card" style="text-align:center;font-weight:700">' + state + '</div>';
-    R.categories.forEach(function (c) {
-      html += '<div class="card vcat"><h3><span>' + c.emoji + '</span>' + esc(c.label) + '<span class="n">' + v.voters[c.id] + ' voto' + (v.voters[c.id] === 1 ? '' : 's') + '</span></h3>';
+    var v = R.votes, ctl = '';
+    if (v.revealed) ctl = '<div class="ctlnote">🎉 Resultado revelado!</div><button class="btn sec" data-vc="votes_reset">Nova votação (zera os votos)</button>';
+    else if (v.open) ctl = '<div class="ctlnote">🗳️ Votação aberta — toque no seu voto</div><div class="grid"><button class="btn sec" data-vc="votes_close">Fechar votação</button><button class="btn" data-vc="votes_reveal">🎉 Revelar resultado</button></div><div class="hint" style="text-align:center">Você não pode votar em você mesmo.</div>';
+    else ctl = '<div class="ctlnote">Craque, bagre, frangueiro… quem manda é a galera.</div><button class="btn" data-vc="votes_open"' + (R.players.length ? '' : ' disabled') + '>🗳️ Abrir votação</button>' + (R.players.length ? '' : '<div class="hint" style="text-align:center">Primeiro monte os times na aba Times.</div>');
+    setHtml($('voteCtl'), ctl);
+    if (!R.players.length) { setHtml($('votes'), ''); return; }
+    var html = R.categories.map(function (c) {
+      var h = '<div class="card vcat"><h3><span>' + c.emoji + '</span>' + esc(c.label) + '<span class="n">' + v.voters[c.id] + ' voto' + (v.voters[c.id] === 1 ? '' : 's') + '</span></h3>';
       if (v.revealed) {
         var r = v.results[c.id], max = r.list.length ? r.list[0].count : 1;
-        html += r.list.length ? r.list.map(function (x) { var w = r.winners.indexOf(x.name) !== -1; return '<div class="res' + (w ? ' win' : '') + '"><div class="l"><b>' + (w ? '👑 ' : '') + esc(x.name) + '</b><span>' + x.count + '</span></div><div class="bar"><i style="width:' + Math.round(x.count / max * 100) + '%"></i></div></div>'; }).join('') : '<div class="hint">Ninguém votou nesta categoria.</div>';
+        h += r.list.length ? r.list.map(function (x) { var w = r.winners.indexOf(x.name) !== -1; return '<div class="res' + (w ? ' win' : '') + '"><div class="l"><b><span class="dot ' + x.team + '"></span> ' + (w ? '👑 ' : '') + esc(x.name) + '</b><span>' + x.count + '</span></div><div class="bar"><i style="width:' + Math.round(x.count / max * 100) + '%"></i></div></div>'; }).join('') : '<div class="hint">Ninguém votou nesta categoria.</div>';
       } else if (v.open) {
-        html += '<div class="opts">' + R.roster.map(function (n) { return '<button class="opt' + (myVotes[c.id] === n ? ' on' : '') + '" data-vote="' + esc(c.id) + '|' + esc(n) + '">' + esc(n) + '</button>'; }).join('') + '</div>';
+        ['a', 'b'].forEach(function (k) {
+          var list = playersOf(k).filter(function (p) { return !(ME && ME.id === p.id); });
+          if (!list.length) return;
+          h += '<div class="grp"><span class="dot ' + k + '"></span>' + esc(tn(k)) + '</div><div class="opts">' + list.map(function (p) { return '<button class="opt' + (myVotes[c.id] === p.id ? ' on' : '') + '" data-vote="' + c.id + '|' + p.id + '">' + esc(p.name) + '</button>'; }).join('') + '</div>';
+        });
       } else {
-        html += '<div class="hint">' + (myVotes[c.id] ? 'Seu voto: <b>' + esc(myVotes[c.id]) + '</b>. ' : '') + 'Os resultados aparecem quando o organizador revelar.</div>';
+        var mine = R.players.filter(function (p) { return p.id === myVotes[c.id]; })[0];
+        h += '<div class="hint">' + (mine ? 'Seu voto: <b>' + esc(mine.name) + '</b>. ' : '') + 'A votação ainda não está aberta.</div>';
       }
-      html += '</div>';
-    });
+      return h + '</div>';
+    }).join('');
     setHtml($('votes'), html);
   }
 
   var QUICK = ['O chute foi pra lua 🌙', 'Frangou! 🧤', 'Bagre! 🐟', 'Gol de placa 🏆', 'Cadê o VAR? 🚨', 'Tá rabugento hoje 😤', 'Culpa do gramado 🌱', 'Segura o pênalti! 😱'];
   function renderWall() {
-    $('wallClosed').classList.toggle('hide', R.commentsOpen); $('wallForm').classList.toggle('hide', !R.commentsOpen);
     $('ccount').textContent = R.comments.length ? '(' + R.comments.length + ')' : '';
     var html = R.comments.slice().reverse().map(function (c) {
       var rx = ['😂', '🔥', '👏', '😤'].map(function (e) { var arr = c.reactions[e] || []; return '<button class="rb' + (arr.indexOf(CID) !== -1 ? ' on' : '') + '" data-rx="' + c.id + '|' + e + '">' + e + (arr.length ? '<small>' + arr.length + '</small>' : '') + '</button>'; }).join('');
-      return '<div class="cm"><div class="h"><span><b>' + esc(c.name) + '</b> <small>' + ago(c.ts) + '</small></span>' + (isAdmin ? '<button class="rb" data-delc="' + c.id + '">✕</button>' : '') + '</div><p>' + esc(c.text) + '</p><div class="rx">' + rx + '</div></div>';
+      return '<div class="cm"><div class="h"><span><b>' + esc(c.name) + '</b> <small>' + ago(c.ts) + '</small></span><button class="rb" data-delc="' + c.id + '" aria-label="Apagar">✕</button></div><p>' + esc(c.text) + '</p><div class="rx">' + rx + '</div></div>';
     }).join('');
     setHtml($('comments'), html || '<div class="empty">Ninguém resenhou ainda.<br>Seja o primeiro a zoar!</div>');
   }
+
+  function renderFab() {
+    var on = !!R && tab === 'p-game';
+    $('fab').style.display = on ? 'block' : 'none';
+    if (R) { $('qAn').textContent = R.teams.a; $('qBn').textContent = R.teams.b; }
+    if (!on) hideAfter();
+    keepAwake();
+  }
+  function render() { if (!R) return; renderHero(); renderQuick(); renderGoals(); renderTeams(); renderVotes(); renderWall(); renderFab(); }
+
+  function apply(room) {
+    var first = !R; R = room; recv = Date.now();
+    if (ME) ME = R.players.filter(function (p) { return p.id === ME.id; })[0] || null;
+    $('gone').classList.add('hide'); $('app').classList.remove('hide');
+    var ids = R.goals.map(function (g) { return g.id; });
+    if (seenGoals === null) seenGoals = ids.slice();
+    else R.goals.forEach(function (g) { if (seenGoals.indexOf(g.id) === -1) { seenGoals.push(g.id); banner(g); } });
+    render();
+    if (first) afterFirst();
+  }
+  function banner(g) {
+    $('bg1').textContent = g.ownGoal ? '🤦 GOL CONTRA!' : '⚽ GOOOL!';
+    $('bg2').textContent = tn(g.team) + (g.player ? ' · ' + g.player : '') + (g.minute ? ' · ' + g.minute + "'" : '');
+    var el = $('banner'); el.classList.add('show'); clearTimeout(banner.t); banner.t = setTimeout(function () { el.classList.remove('show'); }, 5000);
+  }
+
+  // ---------------- entrar na sala (apelido + time, 2 toques)
+  function openWelcome() {
+    $('wNick').value = NICK; $('wA').textContent = R ? R.teams.a : 'Azul'; $('wB').textContent = R ? R.teams.b : 'Laranja';
+    $('wTitle').textContent = ME ? 'Mudar de time' : 'Entrar na sala';
+    $('wSub').textContent = ME ? 'Escolha o novo time (ou só assista).' : 'Escolha seu apelido e o seu time. Leva 5 segundos.';
+    $('mWelcome').classList.add('on'); if (!NICK) setTimeout(function () { $('wNick').focus(); }, 300);
+  }
+  function doJoin(team) {
+    var nick = $('wNick').value.trim();
+    if (!nick) { toast('Digite seu apelido.', true); $('wNick').focus(); return; }
+    NICK = nick; ls('rab_nick', NICK);
+    act({ action: 'join', team: team === 'watch' ? null : team }).then(function (j) {
+      if (!j.ok) { toast(j.error || 'Erro', true); return; }
+      ME = j.me || null; ls(LSME, '1'); $('mWelcome').classList.remove('on'); render();
+      if (newRoom) { newRoom = false; setTimeout(openInvite, 350); }
+    });
+  }
+
+  // ---------------- gol de UM toque
+  function hideAfter() { $('after').classList.add('hide'); clearTimeout(afterTimer); afterId = null; }
+  function showAfter(goalId, team) {
+    afterId = goalId; $('dup').classList.add('hide');
+    $('afterTitle').textContent = '✅ Gol do ' + tn(team);
+    $('afterChips').innerHTML = playersOf(team).map(function (p) { return '<button class="opt" data-pick="' + p.id + '">' + esc(p.name) + '</button>'; }).join('') + '<button class="opt" data-pick="__other">Outro…</button>';
+    $('after').classList.remove('hide'); clearTimeout(afterTimer); afterTimer = setTimeout(hideAfter, 15000);
+  }
+  function quickGoal(team, confirmNew) {
+    vibrate(45);
+    run({ action: 'goal', team: team, confirmNew: confirmNew === true }).then(function (j) {
+      if (j.needConfirm) {
+        var s = j.similar; dupTeam = team; hideAfter();
+        $('dupTx').innerHTML = '⚠️ <b>Será o mesmo gol?</b><br>' + esc(s.by) + ' acabou de anotar um gol do <b>' + esc(tn(s.team)) + '</b>' + (s.player ? ' (' + esc(s.player) + ')' : '') + ' há ' + s.secondsAgo + ' s.';
+        $('dup').classList.remove('hide'); vibrate([60, 40, 60]); return;
+      }
+      if (j.ok) showAfter(j.goalId, team);
+    });
+  }
+  $('qA').onclick = function () { quickGoal('a'); }; $('qB').onclick = function () { quickGoal('b'); };
+  $('dupSame').onclick = function () { $('dup').classList.add('hide'); toast('Ok, não registrei de novo. 👍'); };
+  $('dupDiff').onclick = function () { $('dup').classList.add('hide'); quickGoal(dupTeam, true); };
+  $('afterClose').onclick = hideAfter;
+  $('afterUndo').onclick = function () { var id = afterId; if (!id) return; run({ action: 'goal_undo', goalId: id }, 'Gol desfeito.').then(hideAfter); };
+  function setAuthor(val) {
+    if (!afterId) return; var body = { action: 'goal_edit', goalId: afterId };
+    if (typeof val === 'number') body.playerId = val; else body.playerName = val;
+    run(body).then(function (j) { if (j.ok) toast('Autor do gol definido ⚽'); hideAfter(); });
+  }
+
+  // modal detalhado (⋯): gol contra / escolher jogador antes
+  function pickTeam(t) { goalTeam = t; $('tpA').classList.toggle('on', t === 'a'); $('tpB').classList.toggle('on', t === 'b'); fillGoalPlayers(); }
+  function fillGoalPlayers() {
+    var own = $('gOwn').checked, k = goalTeam ? (own ? (goalTeam === 'a' ? 'b' : 'a') : goalTeam) : null;
+    var list = k ? playersOf(k) : [];
+    $('gPlayer').innerHTML = '<option value="">' + (k ? 'Selecione o jogador…' : 'Escolha o time primeiro…') + '</option>' + list.map(function (p) { return '<option value="' + p.id + '">' + esc(p.name) + '</option>'; }).join('') + (k ? '<option value="__other">Outro (digitar nome)…</option>' : '');
+    $('gPlayer').disabled = !k; $('gOther').classList.add('hide'); $('gOther').value = '';
+  }
+  $('btnGoal').onclick = function () { $('tpA').textContent = R.teams.a; $('tpB').textContent = R.teams.b; $('gOwn').checked = false; pickTeam(null); $('mGoal').classList.add('on'); };
+  $('tpA').onclick = function () { pickTeam('a'); }; $('tpB').onclick = function () { pickTeam('b'); };
+  $('gOwn').onchange = fillGoalPlayers;
+  $('gPlayer').onchange = function () { $('gOther').classList.toggle('hide', this.value !== '__other'); };
+  $('gCancel').onclick = function () { $('mGoal').classList.remove('on'); };
+  function sendDetailedGoal(confirmNew) {
+    if (!goalTeam) return toast('Escolha o time.', true);
+    var sel = $('gPlayer').value, body = { action: 'goal', team: goalTeam, ownGoal: $('gOwn').checked, confirmNew: confirmNew === true };
+    if (sel === '__other') body.playerName = $('gOther').value.trim(); else if (sel) body.playerId = Number(sel);
+    run(body).then(function (j) {
+      if (j.needConfirm) { var s = j.similar; if (confirm('Será o mesmo gol? ' + s.by + ' anotou um gol do ' + tn(s.team) + ' há ' + s.secondsAgo + ' s.\n\nOK = é OUTRO gol (registrar)\nCancelar = é o mesmo gol')) sendDetailedGoal(true); else { $('mGoal').classList.remove('on'); toast('Ok, não registrei de novo. 👍'); } return; }
+      if (j.ok) { $('mGoal').classList.remove('on'); toast('Gol registrado! ⚽'); }
+    });
+  }
+  $('gSend').onclick = function () { sendDetailedGoal(false); };
+
+  // ---------------- cliques gerais
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest('button'); if (!t) return;
+    var d = t.dataset;
+    if (d.join) doJoin(d.join);
+    if (d.pick) { clearTimeout(afterTimer); afterTimer = setTimeout(hideAfter, 15000); if (d.pick === '__other') { var n = prompt('Quem fez o gol?'); if (n && n.trim()) setAuthor(n.trim()); } else setAuthor(Number(d.pick)); }
+    if (d.undo) { if (confirm('Desfazer este gol?')) run({ action: 'goal_undo', goalId: Number(d.undo) }, 'Gol desfeito.'); }
+    if (d.ctl) {
+      var msgs = { start: 'Começar o jogo agora?', finish: 'Encerrar o jogo?', break: 'Começar o intervalo?', second: 'Começar o 2º tempo?' };
+      if (msgs[d.ctl] && !confirm(msgs[d.ctl])) return;
+      run({ action: d.ctl }, d.ctl === 'undo_phase' ? 'Desfeito.' : null);
+    }
+    if (d.vote) { var pr = d.vote.split('|'); run({ action: 'vote', category: pr[0], playerId: Number(pr[1]) }).then(function (j) { if (j.ok) { myVotes = j.myVotes || {}; renderVotes(); toast('Voto registrado!'); } }); }
+    if (d.vc) {
+      var vm = { votes_reveal: 'Revelar o resultado para todos?', votes_reset: 'Zerar todos os votos e começar de novo?' };
+      if (vm[d.vc] && !confirm(vm[d.vc])) return;
+      run({ action: d.vc }).then(function (j) { if (j.ok && d.vc === 'votes_reset') myVotes = {}; });
+    }
+    if (d.rx) { var q = d.rx.split('|'); run({ action: 'react', commentId: Number(q[0]), emoji: q[1] }); }
+    if (d.delc) { if (confirm('Apagar este comentário?')) run({ action: 'comment_delete', commentId: Number(d.delc) }); }
+    if (d.q) { $('wText').value = d.q; sendComment(); }
+    if (d.pl) openPlayer(Number(d.pl));
+    if (d.addteam) openAdd('add', d.addteam);
+    if (t.id === 'meChange') openWelcome();
+  });
+
+  // ---------------- times
+  function openAdd(mode, arg) {
+    addMode = { mode: mode, arg: arg };
+    $('addTitle').textContent = mode === 'add' ? '+ Jogador no ' + tn(arg) : '✏️ Renomear jogador';
+    $('addSub').textContent = mode === 'add' ? 'Para quem está sem celular: digite o nome.' : 'Digite o novo nome.';
+    $('addName').value = mode === 'rename' ? R.players.filter(function (p) { return p.id === arg; })[0].name : '';
+    $('mAdd').classList.add('on'); setTimeout(function () { $('addName').focus(); }, 300);
+  }
+  $('addCancel').onclick = function () { $('mAdd').classList.remove('on'); };
+  $('addOk').onclick = function () {
+    var name = $('addName').value.trim(); if (!name) return;
+    var body = addMode.mode === 'add' ? { action: 'player_add', name: name, team: addMode.arg } : { action: 'player_rename', playerId: addMode.arg, name: name };
+    run(body, addMode.mode === 'add' ? 'Jogador adicionado!' : 'Renomeado.').then(function (j) { if (j.ok) $('mAdd').classList.remove('on'); });
+  };
+  $('addName').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('addOk').click(); });
+  function openPlayer(id) {
+    var p = R.players.filter(function (x) { return x.id === id; })[0]; if (!p) return; plSel = p;
+    $('plName').textContent = p.name; $('plMoveTx').textContent = 'Mover para o ' + tn(p.team === 'a' ? 'b' : 'a'); $('mPlayer').classList.add('on');
+  }
+  $('plClose').onclick = function () { $('mPlayer').classList.remove('on'); };
+  $('plMove').onclick = function () { var p = plSel; $('mPlayer').classList.remove('on'); run({ action: 'player_move', playerId: p.id, team: p.team === 'a' ? 'b' : 'a' }, 'Movido!'); };
+  $('plRename').onclick = function () { $('mPlayer').classList.remove('on'); openAdd('rename', plSel.id); };
+  $('plRemove').onclick = function () { var p = plSel; $('mPlayer').classList.remove('on'); if (confirm('Tirar ' + p.name + ' da sala?')) run({ action: 'player_remove', playerId: p.id }, 'Jogador removido.'); };
+  $('btnShuffle').onclick = function () { if (confirm('Sortear os times de novo? Todos os jogadores serão redistribuídos.')) run({ action: 'shuffle' }, '🎲 Times sorteados!'); };
+
+  // ---------------- mural
+  $('quick').innerHTML = QUICK.map(function (q) { return '<button class="q" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('');
+  function sendComment() {
+    var text = $('wText').value.trim(); if (!text) return;
+    run({ action: 'comment', text: text }).then(function (j) { if (j.ok) { $('wText').value = ''; $('wMsg').textContent = ''; } else $('wMsg').textContent = j.error || ''; });
+  }
+  $('wSend').onclick = sendComment; $('wText').addEventListener('keydown', function (e) { if (e.key === 'Enter') sendComment(); });
+
+  // ---------------- abas
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.onclick = function () {
+      tab = b.dataset.p;
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('on', x === b); });
+      document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('on', p.id === tab); });
+      renderFab();
+    };
+  });
+
+  // ---------------- convidar / menu / configurar
+  function link() { return location.origin + '/s/' + CODE; }
+  function copy(t, msg) { if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { toast(msg || 'Copiado!'); }, function () { toast(t); }); else toast(t); }
+  function inviteText() { return '⚽ ' + R.title + ' — entra na sala, escolhe teu time e vem resenhar: ' + link(); }
+  function openInvite() { $('lnkFriends').textContent = link(); $('qrImg').src = '/qr/' + CODE + '.svg'; $('mInvite').classList.add('on'); }
+  $('btnInvite').onclick = openInvite; $('invClose').onclick = function () { $('mInvite').classList.remove('on'); };
+  $('cpFriends').onclick = function () { copy(inviteText()); };
+  $('waFriends').onclick = function () { window.open('https://wa.me/?text=' + encodeURIComponent(inviteText()), '_blank'); };
 
   var stT = 0;
   function refreshStorage() {
     if (Date.now() - stT < 30000) return; stT = Date.now();
     fetch('/health').then(function (r) { return r.json(); }).then(function (h) {
       var el = $('storageInfo'); if (!el || !h.storage) return;
-      if (h.storage.protected) { el.innerHTML = '💾 <b>Dados protegidos:</b> a sala também fica guardada fora do servidor. Se ele reiniciar, a sala volta sozinha.'; el.style.color = '#86efac'; }
+      if (h.storage.protected) { el.innerHTML = '💾 <b>Dados protegidos:</b> a sala também fica guardada fora do servidor. Se ele reiniciar, ela volta sozinha.'; el.style.color = '#86efac'; }
       else if (h.storage.mode === 'upstash') { el.innerHTML = '⚠️ <b>O armazenamento externo está com problema agora.</b> Por enquanto os dados estão só no servidor.'; el.style.color = '#fde68a'; }
-      else { el.innerHTML = '⚠️ <b>Dados só no servidor:</b> se ele reiniciar, a sala some. Seu celular guarda uma cópia para você restaurar.'; el.style.color = '#fde68a'; }
+      else { el.innerHTML = '⚠️ <b>Dados só no servidor:</b> se ele reiniciar, a sala some (quem criou a sala tem uma cópia no celular para restaurar).'; el.style.color = '#fde68a'; }
     }).catch(function () {});
   }
-  function renderOrg() {
-    $('orgLogin').classList.toggle('hide', isAdmin); $('orgPanel').classList.toggle('hide', !isAdmin);
-    if (!isAdmin) return;
-    refreshStorage();
-    var f = R.format, s = R.status, running = R.clock.running, c = '';
-    function b(label, act, cls, dis) { return '<button class="btn ' + (cls || 'sec') + '" data-ctl="' + act + '"' + (dis ? ' disabled' : '') + '>' + label + '</button>'; }
-    c += b('▶️ Começar o jogo', 'start', 'ok', s !== 'pre');
-    if (f.clock) {
-      c += b(running ? '⏸️ Parar relógio' : '▶️ Retomar relógio', running ? 'pause' : 'resume', 'sec', !(s === 'h1' || s === 'h2'));
-      if (f.halves === 2) { c += b('⏸️ Intervalo', 'break', 'sec', s !== 'h1'); c += b('▶️ Começar 2º tempo', 'second', 'ok', s !== 'break'); }
-    }
-    c += b('⏹️ Encerrar jogo', 'finish', 'warn', s === 'pre' || s === 'finished');
-    setHtml($('ctrl'), c);
-    $('scorerCode').textContent = R._scorerCode || creds.scorerCode || '—';
-    $('btnOpenScoring').textContent = R.scoringOpen ? 'Ligado' : 'Desligado'; $('btnOpenScoring').className = 'btn sm ' + (R.scoringOpen ? 'ok' : 'sec');
-    $('btnWall').textContent = R.commentsOpen ? 'Aberto' : 'Fechado'; $('btnWall').className = 'btn sm ' + (R.commentsOpen ? 'ok' : 'sec');
-    $('btnFilter').textContent = R.filter ? 'Ligado' : 'Desligado'; $('btnFilter').className = 'btn sm ' + (R.filter ? 'ok' : 'sec');
-    var tot = Math.max.apply(null, R.categories.map(function (x) { return R.votes.voters[x.id]; }));
-    $('voteInfo').textContent = (R.votes.revealed ? 'Resultado já revelado. ' : (R.votes.open ? 'Votação aberta. ' : 'Votação fechada. ')) + 'Até ' + tot + ' pessoa(s) já votaram.';
-    $('btnVoteToggle').textContent = R.votes.open ? 'Fechar votação' : 'Abrir votação'; $('btnReveal').disabled = R.votes.revealed;
-    var d = (R.expiresAt - Date.now()) / 86400000; $('expInfo').textContent = 'A sala some em ' + d.toFixed(1).replace('.', ',') + ' dias (máximo de 14 dias no total).';
-    if (!cfgFilled) {
-      $('cTitle').value = R.title; $('cDate').value = R.date; $('cVenue').value = R.venue; $('cA').value = R.teams.a; $('cB').value = R.teams.b;
-      var preset = !f.clock ? 'noclock' : (f.halves === 2 && f.minutes === 30 ? '2x30' : (f.halves === 1 && f.minutes === 60 ? '1x60' : (f.halves === 1 && f.minutes === 40 ? '1x40' : 'custom')));
-      $('cPreset').value = preset; $('cHalves').value = f.halves; $('cMin').value = f.minutes || 30; $('cCustom').classList.toggle('hide', preset !== 'custom');
-      cfgFilled = true;
-    }
-    if (!rosterFilled) { $('cRoster').value = R.roster.join('\n'); rosterFilled = true; }
-  }
-
-  function renderRole() {
-    var r = $('role'); r.classList.toggle('hide', !(isAdmin || isScorer));
-    r.textContent = isAdmin ? 'Organizador' : (R && R.scoringOpen && !isScorer ? '' : 'Marcador');
-    var can = isAdmin || isScorer || (R && R.scoringOpen);
-    $('fab').style.display = can ? 'block' : 'none';
-    $('scorerBox').classList.toggle('hide', can);
-    if (R) { $('qAn').textContent = R.teams.a; $('qBn').textContent = R.teams.b; }
-    if (!can) { hideAfter(); }
-    renderQuick(); keepAwake();
-  }
-
-  // botão grande do organizador: o "próximo passo" do jogo
-  function renderQuick() {
-    var q = $('quickCtl'); if (!R || !isAdmin || R.status === 'finished') { q.classList.add('hide'); return; }
-    var f = R.format, s = R.status, main, act;
-    if (s === 'pre') { main = '▶️ Começar o jogo'; act = 'start'; }
-    else if (s === 'h1' && f.halves === 2) { main = '⏸️ Intervalo'; act = 'break'; }
-    else if (s === 'break') { main = '▶️ Começar 2º tempo'; act = 'second'; }
-    else { main = '⏹️ Encerrar jogo'; act = 'finish'; }
-    $('qcMain').textContent = main; $('qcMain').dataset.ctl = act;
-    var clk = f.clock && (s === 'h1' || s === 'h2');
-    $('qcPause').classList.toggle('hide', !clk);
-    if (clk) { $('qcPause').textContent = R.clock.running ? '⏸️ Parar relógio' : '▶️ Retomar relógio'; $('qcPause').dataset.ctl = R.clock.running ? 'pause' : 'resume'; }
-    q.classList.remove('hide'); $('quickCtl').querySelector('.grid').style.gridTemplateColumns = clk ? '1fr 1fr' : '1fr';
-  }
-
-  // mantém a tela ligada para quem está anotando em quadra
-  var wl = null;
-  function keepAwake() {
-    try {
-      var want = isAdmin || isScorer || (R && R.scoringOpen);
-      if (want && 'wakeLock' in navigator && document.visibilityState === 'visible' && !wl) {
-        navigator.wakeLock.request('screen').then(function (l) { wl = l; l.addEventListener('release', function () { wl = null; }); }).catch(function () {});
-      }
-    } catch (e) {}
-  }
-  document.addEventListener('visibilitychange', keepAwake);
-
-  function render() {
-    if (!R) return;
-    renderHero(); renderGoals(); renderVotes(); renderWall(); renderOrg(); renderRole();
-  }
-
-  function apply(room) {
-    var first = !R; R = room; recv = Date.now();
-    $('gone').classList.add('hide'); $('app').classList.remove('hide');
-    // banner de gol: só para gols novos
-    var ids = R.goals.map(function (g) { return g.id; });
-    if (seenGoals === null) seenGoals = ids.slice();
-    else {
-      R.goals.forEach(function (g) { if (seenGoals.indexOf(g.id) === -1) { seenGoals.push(g.id); if (g.status !== 'annulled') banner(g); } });
-    }
-    render();
-    if (first) afterFirst();
-  }
-  function banner(g) {
-    $('bg1').textContent = g.ownGoal ? '🤦 GOL CONTRA!' : '⚽ GOOOL!';
-    $('bg2').textContent = teamName(g.team) + (g.player ? ' · ' + g.player : '') + (g.minute ? ' · ' + g.minute + "'" : '');
-    var el = $('banner'); el.classList.add('show'); clearTimeout(banner.t); banner.t = setTimeout(function () { el.classList.remove('show'); }, 5000);
-  }
-
-  function showGone() {
-    $('app').classList.add('hide'); $('gone').classList.remove('hide'); $('fab').style.display = 'none';
-    var bk = jparse(ls(LSB), null);
-    if (creds.adminKey && bk && bk.room && bk.room.expiresAt > Date.now()) {
-      $('restoreBox').classList.remove('hide');
-      $('restoreMsg').textContent = 'Este aparelho guardou uma cópia desta sala de ' + Math.round((Date.now() - bk.at) / 60000) + ' min atrás (' + bk.room.score.a + ' x ' + bk.room.score.b + ' · ' + bk.room.goals.length + ' gols). O servidor pode ter reiniciado.';
-    }
-  }
-  $('btnRestore').onclick = function () {
-    var bk = jparse(ls(LSB), null); if (!bk) return;
-    fetch('/api/rooms/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room: bk.room }) })
-      .then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.error); location.reload(); }).catch(function (e) { toast(e.message, true); });
+  $('btnMenu').onclick = function () { refreshStorage(); $('mMenu').classList.add('on'); };
+  $('menuClose').onclick = function () { $('mMenu').classList.remove('on'); };
+  $('miInvite').onclick = function () { $('mMenu').classList.remove('on'); openInvite(); };
+  $('miCard').onclick = function () { $('mMenu').classList.remove('on'); $('btnCard').click(); };
+  $('miExtend').onclick = function () { $('mMenu').classList.remove('on'); run({ action: 'extend' }, 'A sala ficou mais 2 dias no ar.'); };
+  $('miReset').onclick = function () { $('mMenu').classList.remove('on'); if (confirm('Zerar o jogo? Isso apaga os gols e os votos (os times ficam).')) run({ action: 'reset_game', confirm: true }, 'Jogo zerado.'); };
+  $('miDelete').onclick = function () {
+    $('mMenu').classList.remove('on');
+    var w = prompt('Isso apaga a sala para TODOS e não dá para desfazer.\n\nPara confirmar, digite APAGAR:');
+    if (w === null) return; if (w.trim().toUpperCase() !== 'APAGAR') { toast('Cancelado: a palavra não confere.', true); return; }
+    run({ action: 'delete_room', confirm: 'APAGAR' }).then(function (j) { if (j.ok) { ls(LSME, null); ls(LSB, null); leaving = true; location.href = '/'; } });
   };
-
-  // ---------------- backup automático do organizador
-  var bkT = null;
-  function scheduleBackup() { clearTimeout(bkT); bkT = setTimeout(saveBackup, 2500); }
-  function saveBackup() {
-    if (!isAdmin || !creds.adminKey) return;
-    fetch('/api/rooms/' + CODE + '/backup', { headers: { 'x-admin-key': creds.adminKey } }).then(function (r) { return r.json(); }).then(function (j) {
-      if (j.ok) {
-        var full = j.room; // sala completa (com segredos), só neste aparelho
-        ls(LSB, JSON.stringify({ at: Date.now(), room: Object.assign({}, full, { score: R ? R.score : { a: 0, b: 0 } }) }));
-      }
-    }).catch(function () {});
-  }
-
-  // ---------------- papéis
-  function checkRole() {
-    return post('/role', { adminKey: creds.adminKey || '', scorerCode: creds.scorerCode || '', clientId: CID }).then(function (j) {
-      if (j._status === 404) { showGone(); return; }
-      isAdmin = !!j.admin; isScorer = !!j.scorer; myVotes = j.myVotes || {};
-      if (j.admin && j.scorerCode) { creds.scorerCode = j.scorerCode; ls(LSR, JSON.stringify(creds)); }
-      if (creds.adminKey && !j.admin) { creds.adminKey = ''; ls(LSR, JSON.stringify(creds)); }
-      if (creds.scorerCode && !j.scorer) { creds.scorerCode = ''; ls(LSR, JSON.stringify(creds)); }
-      if (R) render();
-    }).catch(function () {});
-  }
-
-  function afterFirst() {
-    if (new URLSearchParams(location.search).get('novo') === '1' && isAdmin) { openInvite(); history.replaceState(null, '', location.pathname); }
-    if (isAdmin) { saveBackup(); }
-  }
-
-  // ---------------- eventos
-  document.querySelectorAll('.tab').forEach(function (b) {
-    b.onclick = function () {
-      document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('on', x === b); });
-      document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('on', p.id === b.dataset.p); });
-    };
-  });
-
-  document.addEventListener('click', function (ev) {
-    var t = ev.target.closest('button'); if (!t) return;
-    if (t.dataset.vote) {
-      var pr = t.dataset.vote.split('|');
-      post('/vote', { clientId: CID, category: pr[0], candidate: pr[1] }).then(function (j) { if (!j.ok) return toast(j.error, true); myVotes = j.myVotes || {}; renderVotes(); toast('Voto registrado!'); });
-    }
-    if (t.dataset.rx) { var q = t.dataset.rx.split('|'); post('/react', { clientId: CID, commentId: Number(q[0]), emoji: q[1] }).then(function (j) { if (!j.ok) toast(j.error, true); }); }
-    if (t.dataset.delc) actAdm({ action: 'delete_comment', id: Number(t.dataset.delc) });
-    if (t.dataset.var) post('/var', { clientId: CID, goalId: Number(t.dataset.var) }).then(function (j) { toast(j.ok ? '🚨 VAR acionado! O organizador decide.' : j.error, !j.ok); });
-    if (t.dataset.undo) {
-      if (!confirm('Desfazer este gol?')) return;
-      post('/goal/undo', { clientId: CID, adminKey: creds.adminKey || '', goalId: Number(t.dataset.undo) }).then(function (j) { toast(j.ok ? 'Gol desfeito.' : j.error, !j.ok); });
-    }
-    if (t.dataset.res) { var rs = t.dataset.res.split(':'); actAdm({ action: 'resolve_goal', decision: rs[0], id: Number(rs[1]) }, rs[0] === 'validate' ? 'Gol validado.' : 'Gol anulado.'); }
-    if (t.dataset.ctl) {
-      var msgs = { start: 'Começar o jogo agora?', finish: 'Encerrar o jogo?', break: 'Começar o intervalo?', second: 'Começar o 2º tempo?' };
-      if (msgs[t.dataset.ctl] && !confirm(msgs[t.dataset.ctl])) return;
-      actAdm({ action: t.dataset.ctl }, 'Feito!');
-    }
-    if (t.dataset.q) { $('wText').value = t.dataset.q; sendComment(); }
-  });
-
-  // marcador
-  $('btnScorer').onclick = function () {
-    var v = $('scCode').value.trim().toUpperCase(); if (!v) return;
-    creds.scorerCode = v; ls(LSR, JSON.stringify(creds));
-    checkRole().then(function () { toast(isScorer ? 'Você agora é marcador! ⚽' : 'Código incorreto.', !isScorer); });
-  };
-
-  // ---- modal de gol
-  function fillPlayers() {
-    var h = '<option value="">Selecione o jogador…</option>' + R.roster.map(function (n) { return '<option value="' + esc(n) + '">' + esc(n) + '</option>'; }).join('') + '<option value="__other">Outro (digitar nome)…</option>';
-    $('gPlayer').innerHTML = h; $('gOther').classList.add('hide'); $('gOther').value = '';
-  }
-  $('gPlayer').onchange = function () { $('gOther').classList.toggle('hide', this.value !== '__other'); };
-  function pickTeam(t) { gTeam = t; $('tpA').classList.toggle('on', t === 'a'); $('tpB').classList.toggle('on', t === 'b'); }
-  $('tpA').onclick = function () { pickTeam('a'); }; $('tpB').onclick = function () { pickTeam('b'); };
-  function resetGoalModal() { $('gConfirm').classList.add('hide'); $('gBtns').classList.remove('hide'); $('gBtns2').classList.add('hide'); }
-  $('btnGoal').onclick = function () {
-    $('tpA').textContent = R.teams.a; $('tpB').textContent = R.teams.b; pickTeam(null); fillPlayers(); $('gOwn').checked = false; resetGoalModal();
-    $('gNickBox').classList.toggle('hide', !!NICK); $('gNick').value = NICK; $('mGoal').classList.add('on');
-  };
-  $('gCancel').onclick = function () { $('mGoal').classList.remove('on'); };
-  function goalBody(confirmNew) {
-    var pl = $('gPlayer').value === '__other' ? $('gOther').value.trim() : $('gPlayer').value;
-    var nick = ($('gNick').value || NICK).trim();
-    return { clientId: CID, nickname: nick, adminKey: creds.adminKey || '', scorerCode: creds.scorerCode || '', team: gTeam, player: pl, ownGoal: $('gOwn').checked, confirmNew: confirmNew === true };
-  }
-  function sendGoal(confirmNew) {
-    var b = goalBody(confirmNew);
-    if (!b.team) return toast('Escolha o time.', true);
-    if (!b.nickname) return toast('Digite seu apelido.', true);
-    NICK = b.nickname; ls('rab_nick', NICK);
-    $('gSend').disabled = true;
-    post('/goal', b).then(function (j) {
-      if (j.needConfirm) {
-        var s = j.similar;
-        $('gConfirm').innerHTML = '⚠️ <b>Será o mesmo gol?</b><br>' + esc(s.by) + ' acabou de anotar um gol do <b>' + esc(teamName(s.team)) + '</b>' + (s.player ? ' (' + esc(s.player) + ')' : '') + ' há ' + s.secondsAgo + ' s.';
-        $('gConfirm').classList.remove('hide'); $('gBtns').classList.add('hide'); $('gBtns2').classList.remove('hide'); return;
-      }
-      if (!j.ok) return toast(j.error || 'Não foi possível registrar.', true);
-      rememberGoal(j.goalId); $('mGoal').classList.remove('on'); toast('Gol registrado! ⚽');
-    }).catch(function () { toast('Sem conexão. Tente de novo.', true); }).then(function () { $('gSend').disabled = false; });
-  }
-  $('gSend').onclick = function () { sendGoal(false); };
-  $('gDiff').onclick = function () { sendGoal(true); };
-  $('gSame').onclick = function () { $('mGoal').classList.remove('on'); toast('Ok, não registrei de novo. 👍'); };
-
-  function rememberGoal(id) { if (!id) return; var m = mine(); if (m.indexOf(id) === -1) { m.push(id); ls(LSG, JSON.stringify(m.slice(-30))); } if (R) renderGoals(); }
-  function vibrate(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
-
-  // ---- gol de UM toque
-  var afterId = null, afterTimer = null, dupTeam = null;
-  function hideAfter() { $('after').classList.add('hide'); clearTimeout(afterTimer); afterId = null; }
-  function showAfter(goalId, team) {
-    afterId = goalId; $('dup').classList.add('hide');
-    $('afterTitle').textContent = '✅ Gol do ' + teamName(team);
-    $('afterChips').innerHTML = R.roster.map(function (n) { return '<button class="opt" data-pick="' + esc(n) + '">' + esc(n) + '</button>'; }).join('') + '<button class="opt" data-pick="__other">Outro…</button>';
-    $('after').classList.remove('hide'); clearTimeout(afterTimer); afterTimer = setTimeout(hideAfter, 15000);
-  }
-  function askNick(then) {
-    $('mNick').classList.add('on'); $('nickIn').value = ''; setTimeout(function () { $('nickIn').focus(); }, 300);
-    $('nickOk').onclick = function () { var v = $('nickIn').value.trim(); if (!v) return; NICK = v; ls('rab_nick', NICK); $('wName').value = NICK; $('mNick').classList.remove('on'); then(); };
-  }
-  function quickGoal(team, confirmNew) {
-    if (!NICK) return askNick(function () { quickGoal(team, confirmNew); });
-    vibrate(45);
-    post('/goal', { clientId: CID, nickname: NICK, adminKey: creds.adminKey || '', scorerCode: creds.scorerCode || '', team: team, player: '', ownGoal: false, confirmNew: confirmNew === true }).then(function (j) {
-      if (j.needConfirm) {
-        var s = j.similar; dupTeam = team; hideAfter();
-        $('dupTx').innerHTML = '⚠️ <b>Será o mesmo gol?</b><br>' + esc(s.by) + ' acabou de anotar um gol do <b>' + esc(teamName(s.team)) + '</b>' + (s.player ? ' (' + esc(s.player) + ')' : '') + ' há ' + s.secondsAgo + ' s.';
-        $('dup').classList.remove('hide'); vibrate([60, 40, 60]); return;
-      }
-      if (!j.ok) return toast(j.error || 'Não foi possível registrar.', true);
-      rememberGoal(j.goalId); showAfter(j.goalId, team);
-    }).catch(function () { toast('Sem conexão. Toque de novo.', true); });
-  }
-  $('qA').onclick = function () { quickGoal('a'); };
-  $('qB').onclick = function () { quickGoal('b'); };
-  $('dupSame').onclick = function () { $('dup').classList.add('hide'); toast('Ok, não registrei de novo. 👍'); };
-  $('dupDiff').onclick = function () { $('dup').classList.add('hide'); quickGoal(dupTeam, true); };
-  $('afterClose').onclick = hideAfter;
-  $('afterUndo').onclick = function () {
-    var id = afterId; if (!id) return;
-    post('/goal/undo', { clientId: CID, adminKey: creds.adminKey || '', goalId: id }).then(function (j) { toast(j.ok ? 'Gol desfeito.' : j.error, !j.ok); hideAfter(); });
-  };
-  function setAuthor(name) {
-    if (!afterId || !name) return;
-    post('/goal/edit', { clientId: CID, adminKey: creds.adminKey || '', goalId: afterId, player: name }).then(function (j) { if (j.ok) toast('Gol do ' + name + ' ⚽'); else toast(j.error, true); hideAfter(); });
-  }
-  document.addEventListener('click', function (ev) {
-    var t = ev.target.closest('[data-pick]'); if (!t) return;
-    clearTimeout(afterTimer); afterTimer = setTimeout(hideAfter, 15000);
-    if (t.dataset.pick === '__other') { var n = prompt('Quem fez o gol?'); if (n && n.trim()) setAuthor(n.trim()); } else setAuthor(t.dataset.pick);
-  });
-
-  // mural
-  $('quick').innerHTML = QUICK.map(function (q) { return '<button class="q" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('');
-  $('wName').value = NICK;
-  function sendComment() {
-    var name = $('wName').value.trim(), text = $('wText').value.trim(), m = $('wMsg');
-    if (!name) { m.textContent = 'Digite seu apelido.'; return; } if (!text) return;
-    NICK = name; ls('rab_nick', NICK);
-    post('/comment', { clientId: CID, name: name, text: text }).then(function (j) { if (!j.ok) { m.textContent = j.error; return; } $('wText').value = ''; m.textContent = ''; });
-  }
-  $('wSend').onclick = sendComment; $('wText').addEventListener('keydown', function (e) { if (e.key === 'Enter') sendComment(); });
-
-  // organizador
-  $('btnAdm').onclick = function () { creds.adminKey = $('admKey').value.trim(); ls(LSR, JSON.stringify(creds)); checkRole().then(function () { if (!isAdmin) toast('Chave incorreta.', true); else { toast('Bem-vindo, organizador!'); saveBackup(); } }); };
-  $('btnLogout').onclick = function () { creds.adminKey = ''; ls(LSR, JSON.stringify(creds)); isAdmin = false; render(); };
-  $('cPreset').onchange = function () { $('cCustom').classList.toggle('hide', this.value !== 'custom'); };
-  $('btnSetup').onclick = function () { actAdm({ action: 'setup', title: $('cTitle').value, date: $('cDate').value, venue: $('cVenue').value, teamA: $('cA').value, teamB: $('cB').value, preset: $('cPreset').value, halves: $('cHalves').value, minutes: $('cMin').value }, 'Configuração salva!'); };
-  $('btnRoster').onclick = function () { actAdm({ action: 'roster', text: $('cRoster').value }, 'Jogadores salvos!'); };
-  $('btnAdj').onclick = function () { actAdm({ action: 'adjust_clock', minutes: $('adjMin').value, seconds: $('adjSec').value || 0 }, 'Relógio ajustado.'); };
-  $('btnReset').onclick = function () { if (confirm('Zerar o jogo? Isso apaga os gols e os votos.')) actAdm({ action: 'reset_game', confirm: true }, 'Jogo zerado.'); };
-  $('btnOpenScoring').onclick = function () { actAdm({ action: 'scoring_open', open: !R.scoringOpen }); };
-  $('btnWall').onclick = function () { actAdm({ action: 'comments_open', open: !R.commentsOpen }); };
-  $('btnFilter').onclick = function () { actAdm({ action: 'filter', on: !R.filter }); };
-  $('btnVoteToggle').onclick = function () { actAdm({ action: 'votes_open', open: !R.votes.open }, R.votes.open ? 'Votação fechada.' : 'Votação aberta!'); };
-  $('btnReveal').onclick = function () { if (confirm('Revelar o resultado das votações para todos?')) actAdm({ action: 'votes_reveal' }, '🎉 Resultado revelado!'); };
-  $('btnVoteReset').onclick = function () { if (confirm('Zerar todos os votos?')) actAdm({ action: 'votes_reset' }, 'Votos zerados.'); };
-  $('btnExtend').onclick = function () { actAdm({ action: 'extend' }, 'Duração ampliada.'); };
-  $('btnNewCode').onclick = function () { if (confirm('Gerar novo código? O código antigo deixa de valer.')) actAdm({ action: 'new_scorer_code' }).then(function (j) { creds.scorerCode = j.scorerCode; ls(LSR, JSON.stringify(creds)); $('scorerCode').textContent = j.scorerCode; toast('Novo código: ' + j.scorerCode); }); };
-  $('btnBackup').onclick = function () {
-    fetch('/api/rooms/' + CODE + '/backup', { headers: { 'x-admin-key': creds.adminKey } }).then(function (r) { return r.json(); }).then(function (j) {
+  $('miBackup').onclick = function () {
+    fetch('/api/rooms/' + CODE + '/backup').then(function (r) { return r.json(); }).then(function (j) {
       if (!j.ok) throw new Error(j.error); var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(j.room)], { type: 'application/json' })); a.download = 'rabugentos-' + CODE + '.json'; document.body.appendChild(a); a.click(); a.remove(); toast('Backup baixado!');
     }).catch(function (e) { toast(e.message, true); });
   };
-  $('btnDelete').onclick = function () { if (confirm('Apagar a sala agora? Não dá para desfazer.')) adm({ action: 'delete_room', confirm: true }).then(function () { ls(LSR, null); ls(LSB, null); location.href = '/'; }).catch(function (e) { toast(e.message, true); }); };
-
-  // convites
-  function links() {
-    var base = location.origin + '/s/' + CODE;
-    return { friends: base, scorers: base + '#sc=' + (creds.scorerCode || ''), admin: base + '#adm=' + encodeURIComponent(creds.adminKey || '') + '&sc=' + (creds.scorerCode || '') };
-  }
-  function copy(t, msg) { if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { toast(msg || 'Copiado!'); }, function () { toast(t); }); else toast(t); }
-  function wa(t) { window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); }
-  function openInvite() {
-    var l = links(); $('lnkFriends').textContent = l.friends; $('lnkScorers').textContent = l.scorers; $('lnkAdmin').textContent = l.admin; $('qrImg').src = '/qr/' + CODE + '.svg'; $('mInvite').classList.add('on');
-  }
-  $('btnInvite').onclick = openInvite; $('invClose').onclick = function () { $('mInvite').classList.remove('on'); };
-  var friendsText = function () { return '⚽ ' + R.title + ' — entra na sala da resenha: ' + links().friends; };
-  var scorersText = function () { return '🧤 Marcador oficial de "' + R.title + '": entra por este link e já pode marcar os gols: ' + links().scorers; };
-  $('cpFriends').onclick = function () { copy(friendsText()); }; $('waFriends').onclick = function () { wa(friendsText()); };
-  $('cpScorers').onclick = function () { copy(scorersText()); }; $('waScorers').onclick = function () { wa(scorersText()); };
-  $('cpAdmin').onclick = function () { copy(links().admin, 'Link do organizador copiado. Guarde com cuidado!'); };
-  $('btnCopyScorer').onclick = function () { copy(scorersText(), 'Convite de marcador copiado!'); };
-  $('btnShare').onclick = function () {
-    var d = { title: R ? R.title : 'Rabugentos', text: R ? '⚽ ' + R.title + ' — entra na sala da resenha!' : '', url: location.origin + '/s/' + CODE };
-    if (navigator.share) navigator.share(d).catch(function () {}); else copy(d.url, 'Link da sala copiado!');
+  $('miConfig').onclick = function () {
+    $('mMenu').classList.remove('on'); var f = R.format;
+    $('cTitle').value = R.title; $('cA').value = R.teams.a; $('cB').value = R.teams.b; $('cDate').value = R.date; $('cVenue').value = R.venue;
+    var preset = !f.clock ? 'noclock' : (f.halves === 2 && f.minutes === 30 ? '2x30' : (f.halves === 1 && f.minutes === 60 ? '1x60' : (f.halves === 1 && f.minutes === 40 ? '1x40' : 'custom')));
+    $('cPreset').value = preset; $('cHalves').value = f.halves; $('cMin').value = f.minutes || 30; $('cCustom').classList.toggle('hide', preset !== 'custom'); $('mConfig').classList.add('on');
   };
-  [$('mGoal'), $('mInvite'), $('mCard')].forEach(function (m) { m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('on'); }); });
+  $('cPreset').onchange = function () { $('cCustom').classList.toggle('hide', this.value !== 'custom'); };
+  $('cCancel').onclick = function () { $('mConfig').classList.remove('on'); };
+  $('cSave').onclick = function () {
+    run({ action: 'setup', title: $('cTitle').value, teamA: $('cA').value, teamB: $('cB').value, date: $('cDate').value, venue: $('cVenue').value, preset: $('cPreset').value, halves: $('cHalves').value, minutes: $('cMin').value }, 'Configuração salva!')
+      .then(function (j) { if (j.ok) $('mConfig').classList.remove('on'); });
+  };
+  [$('mGoal'), $('mInvite'), $('mCard'), $('mMenu'), $('mConfig'), $('mAdd'), $('mPlayer')].forEach(function (m) { m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('on'); }); });
+
+  // ---------------- confirmar antes de sair da sala (botão voltar, fechar, atualizar)
+  history.pushState({ rab: 1 }, '', location.href);
+  window.addEventListener('popstate', function () {
+    if (leaving) return;
+    history.pushState({ rab: 1 }, '', location.href); $('mLeave').classList.add('on');
+  });
+  window.addEventListener('beforeunload', function (e) { if (leaving) return; e.preventDefault(); e.returnValue = ''; });
+  function askLeave() { $('mLeave').classList.add('on'); }
+  $('brand').addEventListener('click', function (e) { e.preventDefault(); askLeave(); });
+  $('miLeave').onclick = function () { $('mMenu').classList.remove('on'); askLeave(); };
+  $('leaveStay').onclick = function () { $('mLeave').classList.remove('on'); };
+  $('leaveGo').onclick = function () { leaving = true; location.href = '/'; };
+
+  // ---------------- tela ligada para quem está jogando
+  function keepAwake() {
+    try {
+      var want = !!ME && R && (R.status === 'h1' || R.status === 'h2' || R.status === 'live');
+      if (want && 'wakeLock' in navigator && document.visibilityState === 'visible' && !wl) navigator.wakeLock.request('screen').then(function (l) { wl = l; l.addEventListener('release', function () { wl = null; }); }).catch(function () {});
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', keepAwake);
 
   // ---------------- cartão da noite (imagem)
   function loadImg(src) { return new Promise(function (res) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = function () { res(null); }; i.src = src; }); }
@@ -820,36 +757,29 @@
       if (logo) { var lh = 200, lw = Math.round(lh * logo.width / logo.height); x.drawImage(logo, 540 - lw / 2, 34, lw, lh); }
       fit(x, R.title, 900, 50, '800', F); x.fillStyle = '#fade70'; x.fillText(R.title, 540, 300);
       x.fillStyle = '#a3a199'; x.font = '500 28px ' + F; x.fillText(fmtWhen(R.date, R.venue), 540, 346);
-      // placar: nomes em cima, placar embaixo
       function team(k, cx, col) { x.fillStyle = '#fff'; fit(x, R.teams[k], 470, 42, '700', F); x.fillText(R.teams[k], cx, 420); x.fillStyle = col; x.fillRect(cx - 50, 440, 100, 8); }
       team('a', 280, '#38bdf8'); team('b', 800, '#f43f5e');
       x.fillStyle = '#fff'; x.font = '800 200px ' + F; x.fillText(R.score.a + ' x ' + R.score.b, 540, 625);
       x.fillStyle = '#a3a199'; x.font = '600 28px ' + F; x.fillText(R.status === 'finished' ? 'FIM DE JOGO' : R.statusLabel.toUpperCase(), 540, 680);
       var y = 750;
-      // artilheiros
-      var tally = {}; R.goals.forEach(function (gl) { if (gl.status !== 'annulled' && !gl.ownGoal && gl.player) tally[gl.player] = (tally[gl.player] || 0) + 1; });
+      var tally = {}; R.goals.forEach(function (gl) { if (!gl.ownGoal && gl.player) tally[gl.player] = (tally[gl.player] || 0) + 1; });
       var top = Object.keys(tally).sort(function (p, q) { return tally[q] - tally[p]; });
       if (top.length) { var tl = '👟 Artilheiro: ' + top.filter(function (n) { return tally[n] === tally[top[0]]; }).join(' e ') + ' (' + tally[top[0]] + ')'; x.fillStyle = '#fade70'; fit(x, tl, 940, 34, '700', F); x.fillText(tl, 540, y); y += 62; }
-      // prêmios (reservamos o espaço antes de listar os gols)
       var awards = []; if (R.votes.revealed) R.categories.forEach(function (cat) { var w = R.votes.results[cat.id].winners; if (w.length) awards.push(cat.emoji + ' ' + cat.label.split(' (')[0] + ': ' + w.join(' e ')); });
-      var need = awards.length ? 60 + awards.length * 50 : 0, gl = R.goals.filter(function (q) { return q.status !== 'annulled'; });
+      var need = awards.length ? 60 + awards.length * 50 : 0, gl2 = R.goals;
       var maxGoals = Math.max(2, Math.min(7, Math.floor((1180 - y - need) / 46)));
       x.font = '500 30px ' + F;
-      gl.slice(0, maxGoals).forEach(function (q) { x.fillStyle = q.team === 'a' ? '#7dd3fc' : '#fda4af'; var line = '⚽ ' + (q.minute ? q.minute + "'  " : '') + (q.player || R.teams[q.team]) + (q.ownGoal ? ' (contra)' : ''); fit(x, line, 900, 30, '500', F); x.fillText(line, 540, y); y += 46; });
-      if (gl.length > maxGoals) { x.fillStyle = '#a3a199'; x.font = '500 26px ' + F; x.fillText('+ ' + (gl.length - maxGoals) + ' gols', 540, y); y += 40; }
-      if (awards.length) {
-        y += 24; x.fillStyle = '#a3a199'; x.font = '700 26px ' + F; x.fillText('RESENHA DA NOITE', 540, y);
-        awards.forEach(function (line) { y += 50; x.fillStyle = '#fff'; fit(x, line, 940, 32, '600', F); x.fillText(line, 540, y); });
-      }
+      gl2.slice(0, maxGoals).forEach(function (q) { x.fillStyle = q.team === 'a' ? '#7dd3fc' : '#fda4af'; var line = '⚽ ' + (q.minute ? q.minute + "'  " : '') + (q.player || R.teams[q.team]) + (q.ownGoal ? ' (contra)' : ''); fit(x, line, 900, 30, '500', F); x.fillText(line, 540, y); y += 46; });
+      if (gl2.length > maxGoals) { x.fillStyle = '#a3a199'; x.font = '500 26px ' + F; x.fillText('+ ' + (gl2.length - maxGoals) + ' gols', 540, y); y += 40; }
+      if (awards.length) { y += 24; x.fillStyle = '#a3a199'; x.font = '700 26px ' + F; x.fillText('RESENHA DA NOITE', 540, y); awards.forEach(function (line) { y += 50; x.fillStyle = '#fff'; fit(x, line, 940, 32, '600', F); x.fillText(line, 540, y); }); }
       x.fillStyle = '#fade70'; x.font = 'italic 600 32px ' + F; fit(x, '“' + phrase() + '”', 940, 32, 'italic 600', F); x.fillText('“' + phrase() + '”', 540, 1235);
       x.fillStyle = '#a3a199'; x.font = '500 24px ' + F; x.fillText('rabugentos · sala ' + CODE + ' · ' + new Date().toLocaleDateString('pt-BR'), 540, 1290);
       x.fillStyle = '#fade70'; x.fillRect(0, 1318, 1080, 14); x.fillRect(0, 1340, 1080, 10);
       return new Promise(function (res) { c.toBlob(function (b) { res(b); }, 'image/png'); });
     });
   }
-  var cardBlob = null;
   $('btnCard').onclick = function () {
-    var btn = this; btn.disabled = true; btn.textContent = 'Gerando…';
+    var btn = $('btnCard'); btn.disabled = true; btn.textContent = 'Gerando…';
     makeCard().then(function (b) { cardBlob = b; $('cardimg').src = URL.createObjectURL(b); $('mCard').classList.add('on'); })
       .catch(function () { toast('Não foi possível gerar a imagem.', true); }).then(function () { btn.disabled = false; btn.textContent = '🖼️ Gerar cartão da noite'; });
   };
@@ -861,9 +791,44 @@
   };
   window.__makeCard = function () { return makeCard().then(function (b) { return new Promise(function (r) { var f = new FileReader(); f.onload = function () { r(f.result); }; f.readAsDataURL(b); }); }); };
 
+  // ---------------- sala sumiu / backup de quem criou
+  function showGone() {
+    $('app').classList.add('hide'); $('gone').classList.remove('hide'); $('fab').style.display = 'none';
+    var bk = jparse(ls(LSB), null);
+    if (bk && bk.room && bk.room.expiresAt > Date.now()) {
+      $('restoreBox').classList.remove('hide');
+      $('restoreMsg').textContent = 'Este aparelho guardou uma cópia desta sala de ' + Math.round((Date.now() - bk.at) / 60000) + ' min atrás (' + (bk.room.goals || []).length + ' gols). O servidor pode ter reiniciado.';
+    }
+  }
+  $('btnRestore').onclick = function () {
+    var bk = jparse(ls(LSB), null); if (!bk) return;
+    fetch('/api/rooms/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room: bk.room }) })
+      .then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.error); leaving = true; location.reload(); }).catch(function (e) { toast(e.message, true); });
+  };
+  function saveBackup() {
+    if (!ls(LSMADE)) return;
+    fetch('/api/rooms/' + CODE + '/backup').then(function (r) { return r.json(); }).then(function (j) { if (j.ok) ls(LSB, JSON.stringify({ at: Date.now(), room: j.room })); }).catch(function () {});
+  }
+
+  function rememberRoom() {
+    var list = jparse(ls('rab_rooms'), []).filter(function (r) { return r.code !== CODE; });
+    list.unshift({ code: CODE, title: R.title, at: Date.now() }); ls('rab_rooms', JSON.stringify(list.slice(0, 8)));
+  }
+  function afterFirst() {
+    rememberRoom(); saveBackup();
+    fetch('/api/rooms/' + CODE + '/me', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId: CID }) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        myVotes = j.myVotes || {}; ME = j.me ? R.players.filter(function (p) { return p.id === j.me.id; })[0] || null : null;
+        if (ME) { ls(LSME, '1'); if (!NICK) { NICK = ME.name; ls('rab_nick', NICK); } }
+        render();
+        if (!ME && ls(LSME) === null) openWelcome();
+        else if (newRoom) { newRoom = false; setTimeout(openInvite, 350); }
+      }).catch(function () { if (ls(LSME) === null) openWelcome(); });
+  }
+
   // ---------------- conexão
   function start() {
-    socket = io({ auth: { room: CODE, role: 'viewer' } });
+    socket = io({ auth: { room: CODE } });
     socket.on('room', apply);
     socket.on('viewers', function (n) { if (R) { R.viewers = n; $('viewers').textContent = n; } });
     socket.on('gone', function () { showGone(); });
@@ -871,8 +836,9 @@
     socket.on('disconnect', function () { $('conn').style.display = 'block'; });
   }
   fetch('/api/rooms/' + CODE).then(function (r) { return r.json().then(function (j) { j._s = r.status; return j; }); }).then(function (j) {
-    if (j._s === 404 || !j.ok) { checkRole().then(function () { showGone(); }); return; }
-    checkRole().then(function () { apply(j.room); start(); setInterval(saveBackup, 30000); setInterval(function () { if (R) { renderGoals(); renderHero(); } }, 30000); setInterval(renderClock, 500); });
+    if (j._s === 404 || !j.ok) { showGone(); return; }
+    apply(j.room); start(); setInterval(saveBackup, 30000);
+    setInterval(function () { if (R) { renderGoals(); renderHero(); } }, 30000); setInterval(renderClock, 500);
   }).catch(function () { $('conn').style.display = 'block'; });
 })();
 </script>

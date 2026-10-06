@@ -12,6 +12,7 @@
 <meta property="og:url" content="__ORIGIN__/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#09090b">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,7 +52,7 @@
   .chip span { display:block; text-align:center; padding:13px 6px; border-radius:12px; border:2px solid var(--line); background:#0d0d0f; font-weight:600; font-size:15px; color:var(--txt); }
   .chip input:checked + span { border-color:var(--y); background:#2b250c; color:var(--y); }
   .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  #err { color:#fca5a5; font-size:14px; margin-top:10px; min-height:18px; }
+  .hint2 { color:var(--mut); font-size:13px; margin-bottom:4px; }
 
   .sec { margin:34px 0 14px; display:flex; align-items:center; gap:12px; font-family:var(--num); font-size:30px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
   .sec::after { content:""; flex:1; height:8px; background:linear-gradient(var(--y) 0 3px,transparent 3px 5px,var(--y) 5px 8px); opacity:.55; }
@@ -67,6 +68,7 @@
   footer { margin-top:40px; text-align:center; color:var(--mut); font-size:12.5px; line-height:1.7; }
   footer img { height:64px; margin-bottom:8px; opacity:.95; }
   .hide { display:none; }
+  .lk { display:block; width:100%; margin-top:10px; background:none; border:0; color:var(--mut); font-size:14px; text-decoration:underline; cursor:pointer; font-family:inherit; padding:8px; }
 </style>
 </head>
 <body>
@@ -75,21 +77,24 @@
   <section class="hero">
     <img class="shield" src="/logo.png" alt="Rabugentos — Futebol e Resenha">
     <h1>O jogo acabou.<em>A resenha começou.</em></h1>
-    <p class="lead">Crie a sala do jogo, mande o link no grupo e pronto: placar ao vivo, votação do craque e do bagre e mural pra zoar a semana inteira. Sem cadastro. A sala some sozinha em <span id="days">7</span> dias.</p>
+    <p class="lead">Crie a sala com um toque, mande o link no grupo e pronto: cada um escolhe o seu time, qualquer um marca os gols e depois é só votar no craque e no bagre. Sem cadastro. A sala some sozinha em <span id="days">7</span> dias.</p>
+    <div class="hide" id="keyBox" style="margin-bottom:10px"><input type="password" id="ckey" placeholder="Senha para criar salas" autocomplete="off"></div>
     <button class="cta" id="btnNew">⚽ Criar sala do jogo</button>
+    <button class="lk" id="btnCustomize">⚙️ Personalizar nome, times e formato (opcional)</button>
     <div class="join"><input id="code" placeholder="CÓDIGO DA SALA" maxlength="40" autocapitalize="characters" autocomplete="off"><button class="btn2" id="btnJoin">Entrar</button></div>
   </section>
 
   <div class="card hide" id="form">
-    <h2>Nova sala</h2>
-    <label for="title">Nome do jogo</label><input id="title" maxlength="40" placeholder="Ex.: Pelada de quinta">
+    <h2>Personalizar</h2>
+    <div class="hint2">Tudo aqui é opcional e dá para mudar depois, dentro da sala.</div>
+    <label for="title">Nome do jogo</label><input id="title" maxlength="40" placeholder="Pelada de hoje">
     <div class="row2">
-      <div><label for="date">Data</label><input type="date" id="date"></div>
-      <div><label for="venue">Campo (opcional)</label><input id="venue" maxlength="60" placeholder="Society do Zé"></div>
+      <div><label for="ta">Time 1</label><input id="ta" maxlength="24" placeholder="Azul"></div>
+      <div><label for="tb">Time 2</label><input id="tb" maxlength="24" placeholder="Laranja"></div>
     </div>
     <div class="row2">
-      <div><label for="ta">Time A</label><input id="ta" maxlength="24" placeholder="Time A"></div>
-      <div><label for="tb">Time B</label><input id="tb" maxlength="24" placeholder="Time B"></div>
+      <div><label for="date">Data</label><input type="date" id="date"></div>
+      <div><label for="venue">Campo</label><input id="venue" maxlength="60" placeholder="Society do Zé"></div>
     </div>
     <label>Formato do jogo</label>
     <div class="chips">
@@ -103,25 +108,24 @@
       <div><label for="halves">Tempos</label><select id="halves"><option value="1">1 tempo</option><option value="2" selected>2 tempos</option></select></div>
       <div><label for="minutes">Minutos por tempo</label><input type="number" id="minutes" min="1" max="120" value="30"></div>
     </div>
-    <div class="hide" id="keyBox"><label for="ckey">Senha para criar salas</label><input type="password" id="ckey" autocomplete="off"></div>
-    <button class="cta" id="btnCreate" style="margin-top:20px">Criar e abrir a sala</button>
-    <div id="err"></div>
+    <button class="cta" id="btnCreate" style="margin-top:20px">Criar com estas opções</button>
   </div>
+  <div id="err" style="color:#fca5a5;font-size:14px;margin-top:10px;text-align:center;min-height:18px"></div>
 
   <div class="card mine hide" id="mine"><h2>Minhas salas</h2><div id="mineList"></div></div>
 
   <div class="sec">Como funciona</div>
   <div class="steps">
-    <div class="step"><div class="n">1</div><div><b>Crie a sala do jogo</b><span>Nome, campo, times e formato: 2 tempos, 1 tempo ou sem relógio.</span></div></div>
-    <div class="step"><div class="n">2</div><div><b>Mande o link no grupo</b><span>Goleiros e o espectador oficial ganham um link para marcar os gols.</span></div></div>
-    <div class="step"><div class="n">3</div><div><b>Resenhe a semana toda</b><span>Vote no craque e no bagre, comente, reaja e gere o cartão da noite.</span></div></div>
+    <div class="step"><div class="n">1</div><div><b>Crie a sala (1 toque)</b><span>Dá para personalizar nome, times e formato, mas não precisa.</span></div></div>
+    <div class="step"><div class="n">2</div><div><b>Mande o link no grupo</b><span>Cada um entra, escolhe o apelido e o time. Quem está sem celular é adicionado por qualquer pessoa.</span></div></div>
+    <div class="step"><div class="n">3</div><div><b>Jogue e resenhe</b><span>Qualquer um da sala marca gol e controla o jogo. No fim, vote no craque e no bagre.</span></div></div>
   </div>
 
   <div class="sec">No jogo</div>
   <div class="feat">
-    <div><b>⚽ Placar ao vivo</b>Gols em tempo real, com quem anotou. Se parecer o mesmo gol, o app pergunta.</div>
-    <div><b>🗳️ Votações</b>Craque, bagre, frangueiro, garçom e maior zoeira, com revelação suspense.</div>
-    <div><b>💬 Mural</b>Comentários, reações e frases prontas pra zoar o amigo.</div>
+    <div><b>⚽ Gol de 1 toque</b>Um botão por time, na ponta do dedo. Se parecer o mesmo gol, o app pergunta.</div>
+    <div><b>👥 Times separados</b>Cada um escolhe o seu lado. Dá para sortear e para adicionar quem está sem celular.</div>
+    <div><b>🗳️ Votações</b>Craque, bagre, frangueiro, garçom e maior zoeira. Ninguém vota em si mesmo.</div>
     <div><b>🖼️ Cartão da noite</b>Imagem pronta pro grupo. É a lembrança: a sala some.</div>
   </div>
 
@@ -137,15 +141,39 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
   function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   $('date').value = today();
+
+  // lembra as últimas escolhas (times e formato) para criar a próxima sala sem digitar nada
+  var last = {}; try { last = JSON.parse(ls('rab_last') || '{}'); } catch (e) {}
+  if (last.ta) $('ta').value = last.ta; if (last.tb) $('tb').value = last.tb;
+  if (last.preset) { var r = document.querySelector('input[name=preset][value="' + last.preset + '"]'); if (r) r.checked = true; }
+  if (last.halves) $('halves').value = last.halves; if (last.minutes) $('minutes').value = last.minutes;
+  function syncCustom() { $('custom').classList.toggle('hide', document.querySelector('input[name=preset]:checked').value !== 'custom'); }
+  document.querySelectorAll('input[name=preset]').forEach(function (r) { r.onchange = syncCustom; }); syncCustom();
 
   fetch('/api/config').then(function (r) { return r.json(); }).then(function (c) {
     $('days').textContent = c.days; if (c.needsCreateKey) $('keyBox').classList.remove('hide');
   }).catch(function () {});
 
-  $('btnNew').onclick = function () { $('form').classList.remove('hide'); $('form').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { $('title').focus(); }, 400); };
-  document.querySelectorAll('input[name=preset]').forEach(function (r) { r.onchange = function () { $('custom').classList.toggle('hide', document.querySelector('input[name=preset]:checked').value !== 'custom'); }; });
+  $('btnCustomize').onclick = function () { var f = $('form'); f.classList.toggle('hide'); if (!f.classList.contains('hide')) { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { $('title').focus(); }, 400); } };
+
+  var busy = false;
+  function create() {
+    if (busy) return; busy = true; $('err').textContent = '';
+    var btns = [$('btnNew'), $('btnCreate')]; btns.forEach(function (b) { b.disabled = true; });
+    var preset = document.querySelector('input[name=preset]:checked').value;
+    var body = { title: $('title').value, date: $('date').value, venue: $('venue').value, teamA: $('ta').value, teamB: $('tb').value, preset: preset, halves: $('halves').value, minutes: $('minutes').value, createKey: $('ckey').value };
+    fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (!j.ok) throw new Error(j.error || 'Não foi possível criar a sala.');
+        ls('rab_last', JSON.stringify({ ta: body.teamA, tb: body.teamB, preset: preset, halves: body.halves, minutes: body.minutes }));
+        ls('rab_made_' + j.code, '1');
+        location.href = '/s/' + j.code + '?novo=1';
+      }).catch(function (e) { $('err').textContent = e.message; busy = false; btns.forEach(function (b) { b.disabled = false; }); });
+  }
+  $('btnNew').onclick = create; $('btnCreate').onclick = create;
 
   function go() {
     var v = $('code').value.trim(); if (!v) return;
@@ -154,26 +182,11 @@
   }
   $('btnJoin').onclick = go; $('code').addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
 
-  $('btnCreate').onclick = function () {
-    var btn = this, err = $('err'); err.textContent = ''; btn.disabled = true;
-    var preset = document.querySelector('input[name=preset]:checked').value;
-    fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-      title: $('title').value, date: $('date').value, venue: $('venue').value, teamA: $('ta').value, teamB: $('tb').value,
-      preset: preset, halves: $('halves').value, minutes: $('minutes').value, createKey: $('ckey').value
-    }) }).then(function (r) { return r.json(); }).then(function (j) {
-      if (!j.ok) throw new Error(j.error || 'Não foi possível criar a sala.');
-      try { localStorage.setItem('rab_room_' + j.code, JSON.stringify({ adminKey: j.adminKey, scorerCode: j.scorerCode, title: $('title').value || 'Jogo da semana', at: Date.now() })); } catch (e) {}
-      location.href = '/s/' + j.code + '?novo=1';
-    }).catch(function (e) { err.textContent = e.message; btn.disabled = false; });
-  };
-
-  // minhas salas (só neste aparelho)
-  var list = [];
-  try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k.indexOf('rab_room_') === 0) { var d = JSON.parse(localStorage.getItem(k)); list.push({ code: k.slice(9), title: d.title || 'Jogo', at: d.at || 0 }); } } } catch (e) {}
-  list.sort(function (a, b) { return b.at - a.at; });
+  // minhas salas (as que você abriu neste aparelho)
+  var list = []; try { list = JSON.parse(ls('rab_rooms') || '[]'); } catch (e) {}
   if (list.length) {
     $('mine').classList.remove('hide');
-    $('mineList').innerHTML = list.slice(0, 6).map(function (r) { return '<a href="/s/' + esc(r.code) + '"><span>' + esc(r.title) + '<br><small>Sala do organizador</small></span><b>' + esc(r.code) + '</b></a>'; }).join('');
+    $('mineList').innerHTML = list.slice(0, 6).map(function (r) { return '<a href="/s/' + esc(r.code) + '"><span>' + esc(r.title) + '<br><small>Voltar para a sala</small></span><b>' + esc(r.code) + '</b></a>'; }).join('');
   }
 })();
 </script>

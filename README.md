@@ -1,18 +1,18 @@
 # Rabugentos — Futebol e Resenha
 
-Identidade visual: escudo do grupo (preto e amarelo `#FADE70`) em `public/logo.png`. Para trocar o escudo, substitua `logo.png`, `favicon.png`, `apple-touch-icon.png`, `icon-512.png` e `og.png` (imagem de prévia do WhatsApp, 1200x630).
+App para a resenha entre amigos: **uma sala por jogo**, um link, e **todo mundo igual** (sem organizador, sem código, sem cadastro). Placar ao vivo, times separados, votação do craque e do bagre, mural e um cartão da noite em imagem. A sala **some sozinha em 7 dias** (pode ficar até 14).
 
-App para a resenha entre amigos depois do jogo (e durante a semana). Cada jogo é uma **sala temporária**: placar ao vivo, votações (craque, bagre, frangueiro, garçom, maior zoeira), mural com reações e um **cartão da noite** em imagem. A sala **some sozinha em 7 dias** (o organizador pode ampliar até 14). Sem cadastro, sem histórico.
+Identidade visual: escudo do grupo (preto e amarelo `#FADE70`) em `public/logo.png`. Para trocar o escudo, substitua `logo.png`, `favicon.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` e `og.png` (prévia do WhatsApp, 1200x630).
 
 ## Como funciona
-- `/` criar sala (nome, data, campo, times, formato: 2x30, 1x60, 1x40, personalizado ou sem relógio) ou entrar com o código.
-- `/s/CODIGO` a sala. Todos veem em tempo real (Socket.IO).
-- **Organizador:** quem cria a sala recebe o *link do organizador* (guarde!). Controla relógio, jogadores, votação, mural e marcadores.
-- **Marcadores** (goleiros, espectador oficial): entram pelo *link de marcador* ou digitando o código e podem marcar gols. Opcional: "qualquer um pode marcar".
-- **Gol de 1 toque (modo quadra):** quem anota (marcador ou organizador) vê dois botões grandes no rodapé, um por time. Um toque registra o gol; logo aparece "Quem fez?" com os nomes (opcional) e o botão **Desfazer**. A tela do celular fica ligada. O ⋯ abre as opções detalhadas (gol contra, escolher jogador antes).
-- **Gol duplicado:** se dois gols do mesmo time chegam em menos de 1 minuto, o app pergunta "Será o mesmo gol?" antes de registrar.
-- **VAR:** qualquer pessoa contesta um gol; o organizador valida ou anula.
-- **Cartão da noite:** imagem do jogo para o WhatsApp (gere antes da sala expirar).
+1. **Criar a sala com 1 toque** (`/`). Nome, times e formato são opcionais ("Personalizar"): o padrão é *Pelada de hoje*, Azul x Laranja, 2 tempos de 30. Formatos: 2x30, 1x60, 1x40, personalizado ou sem relógio.
+2. **Mandar o link no grupo.** Quem abre escolhe o **apelido** e o **time** (2 toques) ou "só assisto".
+3. **Quem está sem celular** é adicionado por qualquer pessoa (aba *Times* → **+ jogador**). Se ele entrar depois com o mesmo nome, assume o próprio lugar.
+4. **Qualquer um da sala** começa, pausa e encerra o jogo, marca gols, move jogadores, sorteia os times e abre a votação. Para não virar bagunça: ações importantes pedem confirmação, há **Desfazer** (gol e fase do jogo) e um **histórico de quem fez o quê**.
+5. **Gol de 1 toque:** um botão grande por time. Depois aparece "Quem fez?" só com os jogadores daquele time (opcional) e **Desfazer**. Se dois gols do mesmo time chegam em menos de 1 minuto, o app pergunta **"Será o mesmo gol?"**. O ⋯ abre as opções (gol contra, escolher o jogador antes).
+6. **Votação:** craque, bagre, frangueiro, garçom e maior zoeira; candidatos separados por time; **ninguém vota em si mesmo**; resultado revelado quando alguém tocar em "Revelar".
+7. **Sair sem querer:** o botão voltar e o logo perguntam "Sair da sala?". Fechar ou atualizar a página também avisa (alguns navegadores de celular limitam isso). A sala continua no ar e aparece em "Minhas salas". Dá para **adicionar à tela inicial** do celular (abre como app, sem barra de endereço).
+8. **Cartão da noite:** imagem do jogo para o WhatsApp (gere antes da sala expirar).
 
 ## Rodar no computador
 ```
@@ -21,29 +21,25 @@ npm start
 ```
 Abra http://localhost:3000
 
-## Publicar no Render (grátis) — serviço separado
-1. Suba esta pasta para um repositório novo no GitHub (ex.: `rabugentos`).
-2. No Render: New → Blueprint (usa o `render.yaml`) ou New → Web Service (Build: `npm install`, Start: `npm start`, Plan: Free).
-3. Opcional: crie a variável `CREATE_KEY` (uma senha). Se existir, só quem souber a senha consegue **criar** salas (entrar e usar continua livre).
-4. Use o UptimeRobot em `/health` a cada 5 min para o serviço não dormir.
+## Publicar no Render (grátis)
+1. Suba esta pasta para um repositório no GitHub (os arquivos na raiz, com a pasta `public`).
+2. No Render: New → Web Service → escolha o repositório (se não aparecer, use **Configure account** para liberar o acesso). Build: `npm install`; Start: `npm start`; Plan: Free.
+3. Opcional: variável `CREATE_KEY` (uma senha): só quem souber consegue **criar** salas (entrar e usar continua livre).
+4. Recomendado: configure o Upstash (abaixo). Use também o UptimeRobot em `/health` (a cada 5 min).
 
 ## Não perder os dados quando o Render reiniciar (recomendado, 5 minutos)
-O Render grátis **reinicia sozinho** (atualizações, manutenção, depois de dormir) e apaga a memória e o disco. Para a sala sobreviver, o app grava cada sala no **Upstash Redis** (grátis: 256 MB e 500 mil comandos por mês; um jogo usa cerca de mil).
+O Render grátis **reinicia sozinho** e apaga a memória e o disco. Para a sala sobreviver, o app grava cada sala no **Upstash Redis** (grátis: 256 MB e 500 mil comandos por mês; um jogo usa cerca de mil).
+1. Crie uma conta grátis em **upstash.com** → **Create Database** (Redis) → plano **Free**.
+2. Na aba **REST API**, copie `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN`.
+3. No Render: serviço → **Environment** → adicione as duas variáveis (Key e Value) → **Save**.
+4. Confira `https://SEU-SITE.onrender.com/health`: deve mostrar `"protected": true` (e o menu ⋯ da sala mostra "Dados protegidos").
 
-1. Crie uma conta grátis em **upstash.com** e clique em **Create Database** (Redis). Nome: `rabugentos`. Escolha a região mais próxima e o plano **Free**.
-2. Na página do banco, aba **REST API**, copie **UPSTASH_REDIS_REST_URL** e **UPSTASH_REDIS_REST_TOKEN** (o token normal, não o "read only").
-3. No Render, abra o serviço → **Environment** → adicione as duas variáveis com esses valores → **Save** (o serviço reinicia sozinho).
-4. Confira: abra `https://SEU-SITE.onrender.com/health`. Deve mostrar `"protected": true`. No painel do organizador (⚙️ → Sala e backup) aparece "💾 Dados protegidos".
-
-Como funciona: as mudanças são gravadas a cada ~4 segundos; ao receber o aviso de desligamento do Render, o app grava tudo antes de sair; ao iniciar, recupera as salas (mesmo código, placar, relógio, chaves e votos). Se o Upstash sair do ar, o app continua funcionando e tenta gravar de novo (o `/health` e o painel avisam).
-
-**Para o serviço não dormir:** enquanto houver salas, o app chama o próprio `/health` a cada 10 min. Para acordar depois de um período sem nenhuma sala, use também o UptimeRobot em `/health` (a cada 5 min).
+As mudanças são gravadas a cada ~4 s; ao receber o aviso de desligamento do Render o app grava tudo antes de sair; ao iniciar, recupera as salas (mesmo código, times, placar, relógio, votos). Se o Upstash sair do ar, o app continua e tenta de novo. Enquanto houver salas, o app chama o próprio `/health` a cada 10 min para não dormir.
 
 ## Limites (de propósito, para ser simples)
-- **Sem o Upstash**, as salas ficam só na memória do servidor: se o Render reiniciar, a sala some. O celular do organizador guarda uma cópia sozinho (a cada 30 s) e mostra o botão **Restaurar a sala**; também há backup em arquivo.
-- **Com o Upstash**, um reinício custa no máximo os últimos ~4 segundos de mudanças, e só se o servidor cair de forma abrupta (sem avisar).
-- Não há contas, ranking nem histórico entre jogos. A sala some em 7 dias (até 14 se ampliada).
-- Filtro de palavrões é opcional por sala (padrão: desligado, é resenha entre amigos).
+- **Sem o Upstash** a sala fica só na memória do servidor: se ele reiniciar, ela some. Quem criou a sala tem uma cópia no celular (atualizada a cada 30 s) e vê o botão **Restaurar a sala**; também há backup em arquivo (menu ⋯).
+- Como todos têm os mesmos poderes, quem tem o link pode mexer em tudo (inclusive apagar a sala, que exige digitar APAGAR). O código da sala é difícil de adivinhar e quase tudo tem Desfazer.
+- Sem contas, ranking nem histórico entre jogos.
 
-## Teste automático
-`npm test` — (1) percorre criação de sala, relógio, gols (com confirmação de duplicidade), VAR, votação, mural, backup/restauração e tempo real; (2) simula o Upstash, derruba o servidor no meio do jogo e confere que tudo volta.
+## Testes
+`npm test`: (1) percorre criação em 1 toque, times, jogadores sem celular, gols (com pergunta de duplicidade), fases do jogo, votação (sem voto em si mesmo), mural, histórico, backup/restauração e tempo real; (2) simula o Upstash, derruba o servidor no meio do jogo e confere que tudo volta.

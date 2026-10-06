@@ -14,8 +14,9 @@ const DATA_FILE = process.env.DATA_FILE || path.join(__dirname, 'rooms.json');
 
 const DAY = 86400000;
 const ROOM_DAYS = 7; // a sala some sozinha depois disso
-const MAX_DAYS = 14; // limite ao prorrogar
+const MAX_DAYS = 14; // limite ao ampliar
 const MAX_ROOMS = 300;
+const MAX_PLAYERS = 40;
 const DUP_WINDOW_MS = 60000; // janela para perguntar "é o mesmo gol?"
 
 const CATEGORIES = [
@@ -27,6 +28,7 @@ const CATEGORIES = [
 ];
 const CAT_IDS = CATEGORIES.map((c) => c.id);
 const REACTIONS = ['😂', '🔥', '👏', '😤'];
+const STATUSES = ['pre', 'h1', 'break', 'h2', 'live', 'finished'];
 
 class BadRequest extends Error {}
 
@@ -54,27 +56,9 @@ function todayStr() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
-
-// filtro simples de palavrões (opcional por sala)
-function normWord(s) {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's')
-    .replace(/@/g, 'a').replace(/\$/g, 's')
-    .replace(/[^a-z]+/g, '')
-    .replace(/(.)\1+/g, '$1');
-}
-const BAD_WORDS = new Set(
-  ['cu', 'cuzao', 'caralho', 'carai', 'porra', 'poha', 'merda', 'bosta', 'puta', 'putaria', 'fdp', 'filhodaputa', 'viado', 'buceta', 'bct', 'pqp', 'arrombado', 'fodase', 'foder']
-    .map(normWord)
-);
-function hasBadWord(text) {
-  return String(text)
-    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9@$]+/g, ' ').split(' ').filter(Boolean)
-    .some((t) => BAD_WORDS.has(normWord(t)));
+function needTeam(v) {
+  if (v !== 'a' && v !== 'b') throw new BadRequest('Escolha o time.');
+  return v;
 }
 
 // ---------------------------------------------------------------- salas
@@ -103,8 +87,6 @@ function freshRoom(code, o) {
     code,
     createdAt: now,
     expiresAt: now + ROOM_DAYS * DAY,
-    adminKey: crypto.randomBytes(12).toString('base64url'),
-    scorerCode: randCode(5),
     title: o.title,
     venue: o.venue,
     date: o.date,
@@ -112,17 +94,81 @@ function freshRoom(code, o) {
     format: o.format,
     status: 'pre', // pre | h1 | break | h2 | live | finished
     clock: { baseSeconds: 0, startedAt: null },
-    roster: [],
+    lastPhase: null,
+    players: [],
+    nextPlayerId: 1,
     goals: [],
     nextGoalId: 1,
     comments: [],
     nextCommentId: 1,
     votes: { open: false, revealed: false, ballots: {} },
-    scoringOpen: false,
-    commentsOpen: true,
-    filter: false,
+    log: [],
+    nextLogId: 1,
     peakViewers: 0,
   };
+}
+
+// Aceita salas gravadas por versões anteriores e backups: devolve uma sala segura (ou null).
+function normalizeRoom(r) {
+  if (!r || typeof r.code !== 'string' || !/^[A-Z2-9]{5}$/.test(r.code)) return null;
+  let format;
+  try {
+    format = parseFormat(r.format && r.format.clock === false ? { preset: 'noclock' } : { preset: 'custom', halves: r.format && r.format.halves, minutes: r.format && r.format.minutes });
+  } catch (e) { format = { halves: 2, minutes: 30, clock: true }; }
+  const room = freshRoom(r.code, {
+    title: cleanText(r.title, 40, 'x', false) || 'Pelada de hoje',
+    venue: cleanText(r.venue, 60, 'x', false),
+    date: /^\d{4}-\d{2}-\d{2}$/.test(r.date) ? r.date : todayStr(),
+    teams: { a: cleanText(r.teams && r.teams.a, 24, 'x', false) || 'Azul', b: cleanText(r.teams && r.teams.b, 24, 'x', false) || 'Laranja' },
+    format,
+  });
+  room.createdAt = Number(r.createdAt) || room.createdAt;
+  room.expiresAt = Math.min(Number(r.expiresAt) || room.expiresAt, Date.now() + MAX_DAYS * DAY);
+  room.status = STATUSES.includes(r.status) ? r.status : 'pre';
+  room.clock = { baseSeconds: Number(r.clock && r.clock.baseSeconds) || 0, startedAt: r.clock && r.clock.startedAt ? Number(r.clock.startedAt) : null };
+  room.peakViewers = Number(r.peakViewers) || 0;
+
+  const names = new Set();
+  room.players = (Array.isArray(r.players) ? r.players : []).filter((p) => p && (p.team === 'a' || p.team === 'b') && typeof p.name === 'string').slice(0, MAX_PLAYERS)
+    .map((p) => ({ id: Number(p.id) || 0, name: cleanText(p.name, 30, 'x', false), team: p.team, cid: typeof p.cid === 'string' && p.cid ? p.cid.slice(0, 60) : null }))
+    .filter((p) => p.name && !names.has(p.name.toLowerCase()) && names.add(p.name.toLowerCase()));
+  let maxP = room.players.reduce((m, p) => Math.max(m, p.id), 0);
+  room.players.forEach((p) => { if (!p.id) p.id = ++maxP; });
+  room.nextPlayerId = Math.max(Number(r.nextPlayerId) || 1, maxP + 1);
+
+  room.goals = (Array.isArray(r.goals) ? r.goals : []).filter((g) => g && (g.team === 'a' || g.team === 'b') && g.status !== 'annulled').slice(0, 300).map((g) => ({
+    id: Number(g.id) || 0, team: g.team, playerId: Number.isFinite(Number(g.playerId)) && g.playerId !== null && room.players.some((p) => p.id === Number(g.playerId)) ? Number(g.playerId) : null,
+    playerName: cleanText(g.playerName || g.player || '', 40, 'x', false), ownGoal: !!g.ownGoal, byName: cleanText(g.byName, 30, 'x', false) || '?',
+    byId: String(g.byId || '').slice(0, 60), ts: Number(g.ts) || Date.now(), minute: g.minute == null ? null : Number(g.minute),
+  }));
+  let maxG = room.goals.reduce((m, g) => Math.max(m, g.id), 0);
+  room.goals.forEach((g) => { if (!g.id) g.id = ++maxG; });
+  room.nextGoalId = Math.max(Number(r.nextGoalId) || 1, maxG + 1);
+
+  room.comments = (Array.isArray(r.comments) ? r.comments : []).filter((c) => c && typeof c.text === 'string').slice(-200).map((c) => ({
+    id: Number(c.id) || 0, name: cleanText(c.name, 30, 'x', false) || '?', text: cleanText(c.text, 200, 'x', false), ts: Number(c.ts) || Date.now(),
+    cid: String(c.cid || '').slice(0, 60), reactions: c.reactions && typeof c.reactions === 'object' ? c.reactions : {},
+  }));
+  let maxC = room.comments.reduce((m, c) => Math.max(m, c.id), 0);
+  room.comments.forEach((c) => { if (!c.id) c.id = ++maxC; });
+  room.nextCommentId = Math.max(Number(r.nextCommentId) || 1, maxC + 1);
+
+  if (r.votes && typeof r.votes === 'object') {
+    room.votes.open = !!r.votes.open;
+    room.votes.revealed = !!r.votes.revealed;
+    const bal = r.votes.ballots && typeof r.votes.ballots === 'object' ? r.votes.ballots : {};
+    CAT_IDS.forEach((c) => {
+      const src = bal[c] && typeof bal[c] === 'object' ? bal[c] : {};
+      const out = {};
+      Object.keys(src).forEach((cid) => { const id = Number(src[cid]); if (room.players.some((p) => p.id === id)) out[cid] = id; });
+      room.votes.ballots[c] = out;
+    });
+  }
+  room.log = (Array.isArray(r.log) ? r.log : []).filter((l) => l && typeof l.text === 'string').slice(-80).map((l) => ({ id: Number(l.id) || 0, ts: Number(l.ts) || Date.now(), who: cleanText(l.who, 30, 'x', false), text: cleanText(l.text, 120, 'x', false) }));
+  let maxL = room.log.reduce((m, l) => Math.max(m, l.id), 0);
+  room.log.forEach((l) => { if (!l.id) l.id = ++maxL; });
+  room.nextLogId = Math.max(Number(r.nextLogId) || 1, maxL + 1);
+  return room;
 }
 
 function secs(room) {
@@ -135,7 +181,7 @@ function freeze(room) {
 }
 function computeScore(room) {
   const s = { a: 0, b: 0 };
-  for (const g of room.goals) if (g.status !== 'annulled') s[g.team] += 1;
+  for (const g of room.goals) s[g.team] += 1;
   return s;
 }
 function statusLabel(room) {
@@ -143,14 +189,16 @@ function statusLabel(room) {
   if (paused) return 'Jogo parado';
   return { pre: 'Antes do jogo', h1: room.format.halves === 2 ? '1º tempo' : 'Em jogo', break: 'Intervalo', h2: '2º tempo', live: 'Em jogo', finished: 'Fim de jogo' }[room.status];
 }
+function playerById(room, id) { return room.players.find((p) => p.id === Number(id)); }
+function goalPlayerName(room, g) { const p = playerById(room, g.playerId); return p ? p.name : g.playerName || ''; }
 
 function results(room) {
   const out = {};
   for (const cat of CAT_IDS) {
     const tally = {};
-    const ballots = room.votes.ballots[cat] || {};
-    Object.values(ballots).forEach((n) => { tally[n] = (tally[n] || 0) + 1; });
-    const list = Object.keys(tally).map((name) => ({ name, count: tally[name] })).sort((x, y) => y.count - x.count || x.name.localeCompare(y.name));
+    Object.values(room.votes.ballots[cat] || {}).forEach((id) => { tally[id] = (tally[id] || 0) + 1; });
+    const list = Object.keys(tally).map((id) => { const p = playerById(room, id); return p ? { id: p.id, name: p.name, team: p.team, count: tally[id] } : null; })
+      .filter(Boolean).sort((x, y) => y.count - x.count || x.name.localeCompare(y.name));
     out[cat] = { list, winners: list.length ? list.filter((x) => x.count === list[0].count).map((x) => x.name) : [] };
   }
   return out;
@@ -169,18 +217,14 @@ function publicRoom(room) {
     status: room.status,
     statusLabel: statusLabel(room),
     clock: { seconds: Math.floor(secs(room)), running: room.clock.startedAt !== null },
+    undoPhase: room.lastPhase ? { available: true, label: room.lastPhase.label } : { available: false, label: '' },
     score: computeScore(room),
-    goals: room.goals.map((g) => ({
-      id: g.id, team: g.team, player: g.player, ownGoal: g.ownGoal, by: g.byName, minute: g.minute, ts: g.ts,
-      status: g.status, varCount: g.varIds.length, locked: !!g.varLocked,
-    })),
-    roster: room.roster,
+    players: room.players.map((p) => ({ id: p.id, name: p.name, team: p.team, phone: !!p.cid })),
+    goals: room.goals.map((g) => ({ id: g.id, team: g.team, playerId: g.playerId, player: goalPlayerName(room, g), ownGoal: g.ownGoal, by: g.byName, minute: g.minute, ts: g.ts })),
     comments: room.comments.map((c) => ({ id: c.id, name: c.name, text: c.text, ts: c.ts, reactions: c.reactions })),
-    commentsOpen: room.commentsOpen,
-    scoringOpen: room.scoringOpen,
-    filter: room.filter,
     votes: { open: room.votes.open, revealed: room.votes.revealed, voters, results: room.votes.revealed ? results(room) : null },
     categories: CATEGORIES,
+    log: room.log.slice(-40),
     expiresAt: room.expiresAt,
     viewers: viewersOf(room.code),
     serverTime: Date.now(),
@@ -201,7 +245,7 @@ function viewersOf(code) {
 
 // ---------------------------------------------------------------- armazenamento
 // Sempre guarda em arquivo local (sobrevive a reinício simples do processo) e, se configurado,
-// também no Upstash Redis (gratuito): assim a sala sobrevive até a reinício/atualização do Render.
+// também no Upstash Redis (gratuito): assim a sala sobrevive a reinício/atualização do Render.
 const REMOTE_URL = (process.env.UPSTASH_REDIS_REST_URL || '').replace(/\/+$/, '');
 const REMOTE_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || '';
 const FLUSH_MS = Number(process.env.FLUSH_MS) || 4000;
@@ -276,12 +320,11 @@ async function flushAll() {
     scheduleFlush(RETRY_MS);
   }
 }
-function saveSoon() { /* compatibilidade */ scheduleFlush(); }
 
 function loadRoomsFromFile() {
   try {
     if (!fs.existsSync(DATA_FILE)) return;
-    for (const r of JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))) if (r && r.code && r.expiresAt > Date.now()) rooms.set(r.code, r);
+    for (const raw of JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))) { const r = normalizeRoom(raw); if (r && r.expiresAt > Date.now()) rooms.set(r.code, r); }
     console.log('Salas recuperadas do arquivo:', rooms.size);
   } catch (e) { console.warn('Não foi possível ler as salas salvas:', e.message); }
 }
@@ -319,15 +362,6 @@ function fail(res, e) {
   console.error(e);
   return res.status(500).json({ ok: false, error: 'Erro interno.' });
 }
-function needTeam(v) {
-  if (v !== 'a' && v !== 'b') throw new BadRequest('Escolha o time.');
-  return v;
-}
-function addToRoster(room, name) {
-  if (!name) return;
-  if (room.roster.some((n) => n.toLowerCase() === name.toLowerCase())) return;
-  if (room.roster.length < 40) room.roster.push(name);
-}
 
 app.get('/health', (req, res) => res.json({
   ok: true, rooms: rooms.size, uptime: Math.round(process.uptime()),
@@ -335,81 +369,46 @@ app.get('/health', (req, res) => res.json({
 }));
 app.get('/api/config', (req, res) => res.json({ needsCreateKey: !!CREATE_KEY, days: ROOM_DAYS }));
 
-// ---- criar sala
+// ---- criar sala (tudo opcional: dá para criar com um toque)
 app.post('/api/rooms', (req, res) => {
   try {
-    if (limited('create:' + req.ip, 8, 3600000)) throw new BadRequest('Muitas salas criadas por aqui. Tente de novo mais tarde.');
+    if (limited('create:' + req.ip, 12, 3600000)) throw new BadRequest('Muitas salas criadas por aqui. Tente de novo mais tarde.');
     if (CREATE_KEY && !sameKey(CREATE_KEY, req.body && req.body.createKey)) return res.status(401).json({ ok: false, error: 'Senha de criação incorreta.' });
     if (rooms.size >= MAX_ROOMS) throw new BadRequest('O servidor está cheio de salas no momento. Tente mais tarde.');
     const b = req.body || {};
     const date = cleanText(b.date, 10, 'data', false);
     if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new BadRequest('Data inválida.');
-    const room = freshRoom(
-      (() => { let c; do { c = randCode(5); } while (rooms.has(c)); return c; })(),
-      {
-        title: cleanText(b.title, 40, 'nome do jogo', false) || 'Jogo da semana',
-        venue: cleanText(b.venue, 60, 'campo', false),
-        date: date || todayStr(),
-        teams: { a: cleanText(b.teamA, 24, 'time A', false) || 'Time A', b: cleanText(b.teamB, 24, 'time B', false) || 'Time B' },
-        format: parseFormat({ preset: b.preset || '2x30', halves: b.halves, minutes: b.minutes }),
-      }
-    );
-    rooms.set(room.code, room);
-    markDirty(room.code);
-    res.json({ ok: true, code: room.code, adminKey: room.adminKey, scorerCode: room.scorerCode });
-  } catch (e) { fail(res, e); }
-});
-
-// ---- restaurar sala (backup guardado no celular do organizador)
-app.post('/api/rooms/restore', (req, res) => {
-  try {
-    if (limited('create:' + req.ip, 8, 3600000)) throw new BadRequest('Muitas tentativas. Tente de novo mais tarde.');
-    const r = req.body && req.body.room;
-    if (!r || typeof r.code !== 'string' || !/^[A-Z2-9]{5}$/.test(r.code) || typeof r.adminKey !== 'string' || r.adminKey.length < 10)
-      throw new BadRequest('Backup inválido.');
-    if (rooms.has(r.code)) return res.status(409).json({ ok: false, error: 'Essa sala já existe.' });
-    if (!(r.expiresAt > Date.now())) return res.status(410).json({ ok: false, error: 'Essa sala já expirou.' });
-    if (rooms.size >= MAX_ROOMS) throw new BadRequest('O servidor está cheio de salas no momento.');
-    const base = freshRoom(r.code, { title: 'Jogo', venue: '', date: todayStr(), teams: { a: 'Time A', b: 'Time B' }, format: { halves: 2, minutes: 30, clock: true } });
-    const room = Object.assign(base, {
-      adminKey: r.adminKey,
-      scorerCode: typeof r.scorerCode === 'string' ? r.scorerCode.slice(0, 8) : base.scorerCode,
-      createdAt: Number(r.createdAt) || base.createdAt,
-      expiresAt: Math.min(Number(r.expiresAt), Date.now() + MAX_DAYS * DAY),
-      title: cleanText(r.title, 40, 'x', false) || 'Jogo',
-      venue: cleanText(r.venue, 60, 'x', false),
-      date: /^\d{4}-\d{2}-\d{2}$/.test(r.date) ? r.date : todayStr(),
-      teams: { a: cleanText(r.teams && r.teams.a, 24, 'x', false) || 'Time A', b: cleanText(r.teams && r.teams.b, 24, 'x', false) || 'Time B' },
-      format: parseFormat(r.format && r.format.clock === false ? { preset: 'noclock' } : { preset: 'custom', halves: r.format && r.format.halves, minutes: r.format && r.format.minutes }),
-      status: ['pre', 'h1', 'break', 'h2', 'live', 'finished'].includes(r.status) ? r.status : 'pre',
-      clock: { baseSeconds: Number(r.clock && r.clock.baseSeconds) || 0, startedAt: r.clock && r.clock.startedAt ? Number(r.clock.startedAt) : null },
-      roster: Array.isArray(r.roster) ? r.roster.filter((n) => typeof n === 'string').slice(0, 40) : [],
-      goals: Array.isArray(r.goals) ? r.goals.slice(0, 300) : [],
-      nextGoalId: Number(r.nextGoalId) || 1000,
-      comments: Array.isArray(r.comments) ? r.comments.slice(-200) : [],
-      nextCommentId: Number(r.nextCommentId) || 1000,
-      votes: r.votes && typeof r.votes === 'object' ? { open: !!r.votes.open, revealed: !!r.votes.revealed, ballots: r.votes.ballots && typeof r.votes.ballots === 'object' ? r.votes.ballots : {} } : base.votes,
-      scoringOpen: !!r.scoringOpen,
-      commentsOpen: r.commentsOpen !== false,
-      filter: !!r.filter,
+    let code;
+    do { code = randCode(5); } while (rooms.has(code));
+    const room = freshRoom(code, {
+      title: cleanText(b.title, 40, 'nome do jogo', false) || 'Pelada de hoje',
+      venue: cleanText(b.venue, 60, 'campo', false),
+      date: date || todayStr(),
+      teams: { a: cleanText(b.teamA, 24, 'time A', false) || 'Azul', b: cleanText(b.teamB, 24, 'time B', false) || 'Laranja' },
+      format: parseFormat({ preset: b.preset || '2x30', halves: b.halves, minutes: b.minutes }),
     });
-    room.goals = room.goals.filter((g) => g && (g.team === 'a' || g.team === 'b')).map((g) => ({
-      id: Number(g.id) || room.nextGoalId++, team: g.team, player: cleanText(g.player, 40, 'x', false), ownGoal: !!g.ownGoal,
-      byName: cleanText(g.byName, 30, 'x', false), byId: String(g.byId || '').slice(0, 60), ts: Number(g.ts) || Date.now(),
-      minute: g.minute == null ? null : Number(g.minute), status: ['ok', 'contested', 'annulled'].includes(g.status) ? g.status : 'ok',
-      varIds: Array.isArray(g.varIds) ? g.varIds.slice(0, 50) : [],
-    }));
-    room.comments = room.comments.filter((c) => c && typeof c.text === 'string').map((c) => ({
-      id: Number(c.id) || room.nextCommentId++, name: cleanText(c.name, 30, 'x', false), text: cleanText(c.text, 200, 'x', false), ts: Number(c.ts) || Date.now(), cid: String(c.cid || '').slice(0, 60),
-      reactions: c.reactions && typeof c.reactions === 'object' ? c.reactions : {},
-    }));
     rooms.set(room.code, room);
     markDirty(room.code);
     res.json({ ok: true, code: room.code });
   } catch (e) { fail(res, e); }
 });
 
-// ---- leitura
+// ---- restaurar sala (cópia guardada no celular de quem criou)
+app.post('/api/rooms/restore', (req, res) => {
+  try {
+    if (limited('create:' + req.ip, 12, 3600000)) throw new BadRequest('Muitas tentativas. Tente de novo mais tarde.');
+    const raw = req.body && req.body.room;
+    const room = normalizeRoom(raw);
+    if (!room) throw new BadRequest('Backup inválido.');
+    if (rooms.has(room.code)) return res.status(409).json({ ok: false, error: 'Essa sala já existe.' });
+    if (!(Number(raw.expiresAt) > Date.now())) return res.status(410).json({ ok: false, error: 'Essa sala já expirou.' });
+    if (rooms.size >= MAX_ROOMS) throw new BadRequest('O servidor está cheio de salas no momento.');
+    rooms.set(room.code, room);
+    markDirty(room.code);
+    res.json({ ok: true, code: room.code });
+  } catch (e) { fail(res, e); }
+});
+
 app.get('/api/rooms/:code', (req, res) => {
   const room = getRoom(req, res);
   if (!room) return;
@@ -417,13 +416,11 @@ app.get('/api/rooms/:code', (req, res) => {
   res.json({ ok: true, room: publicRoom(room) });
 });
 
-app.post('/api/rooms/:code/role', (req, res) => {
+app.get('/api/rooms/:code/backup', (req, res) => {
   const room = getRoom(req, res);
   if (!room) return;
-  const b = req.body || {};
-  if (limited('role:' + req.ip, 120, 60000)) return res.status(429).json({ ok: false, error: 'Muitas tentativas. Aguarde um minuto.' });
-  const admin = sameKey(room.adminKey, b.adminKey);
-  res.json({ ok: true, admin, scorer: admin || sameKey(room.scorerCode, String(b.scorerCode || '').toUpperCase()), scorerCode: admin ? room.scorerCode : undefined, myVotes: myVotes(room, b.clientId) });
+  res.set('Cache-Control', 'no-store');
+  res.json({ ok: true, room });
 });
 
 function myVotes(room, cid) {
@@ -432,149 +429,229 @@ function myVotes(room, cid) {
   CAT_IDS.forEach((c) => { const v = (room.votes.ballots[c] || {})[cid]; if (v) out[c] = v; });
   return out;
 }
-
-// ---- gols (organizador, marcadores com código, ou qualquer um se a sala estiver "aberta")
-app.post('/api/rooms/:code/goal', (req, res) => {
+// quem sou eu nesta sala (meu jogador e meus votos)
+app.post('/api/rooms/:code/me', (req, res) => {
   const room = getRoom(req, res);
   if (!room) return;
-  try {
-    const b = req.body || {};
-    const isAdmin = sameKey(room.adminKey, b.adminKey);
-    const allowed = room.scoringOpen || isAdmin || sameKey(room.scorerCode, String(b.scorerCode || '').toUpperCase());
-    if (!allowed) return res.status(403).json({ ok: false, error: 'Para marcar gols você precisa do código de marcador.' });
-    const cid = cleanText(b.clientId, 60, 'cliente', true);
-    if (limited('goal:' + cid, 6, 15000)) throw new BadRequest('Calma! Muitos gols em poucos segundos.');
-    const by = cleanText(b.nickname, 30, 'seu apelido', true);
-    const team = needTeam(b.team);
-    const player = cleanText(b.player, 40, 'jogador', false);
-    const own = b.ownGoal === true;
-
-    const recent = room.goals.filter((g) => g.team === team && g.status !== 'annulled' && Date.now() - g.ts < DUP_WINDOW_MS).pop();
-    if (recent && b.confirmNew !== true) {
-      return res.json({ ok: false, needConfirm: true, similar: { team, player: recent.player, by: recent.byName, secondsAgo: Math.round((Date.now() - recent.ts) / 1000) } });
-    }
-    const running = room.format.clock && (room.status === 'h1' || room.status === 'h2' || room.status === 'break');
-    const goalId = room.nextGoalId++;
-    room.goals.push({
-      id: goalId, team, player, ownGoal: own, byName: by, byId: cid, ts: Date.now(),
-      minute: running ? Math.floor(secs(room) / 60) + 1 : null, status: 'ok', varIds: [],
-    });
-    if (!own) addToRoster(room, player);
-    emitRoom(room);
-    res.json({ ok: true, goalId });
-  } catch (e) { fail(res, e); }
+  const cid = String((req.body && req.body.clientId) || '').slice(0, 60);
+  const p = room.players.find((x) => x.cid === cid);
+  res.json({ ok: true, me: p ? { id: p.id, name: p.name, team: p.team } : null, myVotes: myVotes(room, cid) });
 });
 
-app.post('/api/rooms/:code/goal/edit', (req, res) => {
-  const room = getRoom(req, res);
-  if (!room) return;
-  try {
-    const b = req.body || {};
-    const g = room.goals.find((x) => x.id === Number(b.goalId));
-    if (!g) throw new BadRequest('Gol não encontrado.');
-    const isAdmin = sameKey(room.adminKey, b.adminKey);
-    if (!isAdmin && g.byId !== String(b.clientId || '')) throw new BadRequest('Só quem anotou o gol (ou o organizador) pode mudar o autor.');
-    g.player = cleanText(b.player, 40, 'jogador', false);
-    if (g.player && !g.ownGoal) addToRoster(room, g.player);
-    emitRoom(room);
-    res.json({ ok: true });
-  } catch (e) { fail(res, e); }
-});
+// ---------------------------------------------------------------- ações (qualquer pessoa da sala)
+function note(room, who, text) {
+  room.log.push({ id: room.nextLogId++, ts: Date.now(), who, text });
+  if (room.log.length > 80) room.log.shift();
+}
+function teamName(room, t) { return room.teams[t]; }
+function nameTaken(room, name, exceptId) {
+  return room.players.some((p) => p.id !== exceptId && p.name.toLowerCase() === name.toLowerCase());
+}
+function removePlayer(room, id) {
+  const i = room.players.findIndex((p) => p.id === id);
+  if (i === -1) return;
+  room.players.splice(i, 1);
+  CAT_IDS.forEach((c) => { const b = room.votes.ballots[c]; if (b) Object.keys(b).forEach((cid) => { if (b[cid] === id) delete b[cid]; }); });
+}
+// acha (ou cria) o jogador citado num gol
+function resolvePlayer(room, b, team, own) {
+  if (b.playerId !== undefined && b.playerId !== null && b.playerId !== '') {
+    const p = playerById(room, b.playerId);
+    if (!p) throw new BadRequest('Jogador não encontrado.');
+    return p;
+  }
+  const name = cleanText(b.playerName, 30, 'jogador', false);
+  if (!name) return null;
+  const found = room.players.find((p) => p.name.toLowerCase() === name.toLowerCase());
+  if (found) return found;
+  if (room.players.length >= MAX_PLAYERS) return null;
+  const p = { id: room.nextPlayerId++, name, team: own ? (team === 'a' ? 'b' : 'a') : team, cid: null };
+  room.players.push(p);
+  return p;
+}
+function phaseChange(room, label, mutate) {
+  const before = { status: room.status, clock: { baseSeconds: room.clock.baseSeconds, startedAt: room.clock.startedAt } };
+  mutate();
+  room.lastPhase = Object.assign(before, { label });
+}
 
-app.post('/api/rooms/:code/goal/undo', (req, res) => {
-  const room = getRoom(req, res);
-  if (!room) return;
-  try {
-    const b = req.body || {};
-    const i = room.goals.findIndex((g) => g.id === Number(b.goalId));
-    if (i === -1) throw new BadRequest('Gol não encontrado.');
-    const isAdmin = sameKey(room.adminKey, b.adminKey);
-    if (!isAdmin && room.goals[i].byId !== String(b.clientId || '')) throw new BadRequest('Só quem anotou o gol (ou o organizador) pode desfazer.');
-    room.goals.splice(i, 1);
-    emitRoom(room);
-    res.json({ ok: true });
-  } catch (e) { fail(res, e); }
-});
-
-app.post('/api/rooms/:code/var', (req, res) => {
-  const room = getRoom(req, res);
-  if (!room) return;
-  try {
-    const b = req.body || {};
-    const g = room.goals.find((x) => x.id === Number(b.goalId));
-    if (!g) throw new BadRequest('Gol não encontrado.');
-    const cid = cleanText(b.clientId, 60, 'cliente', true);
-    if (g.status === 'annulled') throw new BadRequest('Esse gol já foi anulado.');
-    if (g.varLocked) throw new BadRequest('O organizador já validou esse gol.');
-    if (!g.varIds.includes(cid)) g.varIds.push(cid);
-    g.status = 'contested';
-    emitRoom(room);
-    res.json({ ok: true });
-  } catch (e) { fail(res, e); }
-});
-
-// ---- mural
-app.post('/api/rooms/:code/comment', (req, res) => {
-  const room = getRoom(req, res);
-  if (!room) return;
-  try {
-    const b = req.body || {};
-    if (!room.commentsOpen) return res.status(403).json({ ok: false, error: 'O mural está fechado.' });
-    const cid = cleanText(b.clientId, 60, 'cliente', true);
-    if (limited('cm:' + cid, 1, 1500) || limited('cmip:' + req.ip, 120, 60000)) throw new BadRequest('Calma! Aguarde um instante para comentar de novo.');
-    const name = cleanText(b.name, 30, 'seu apelido', true);
-    const text = cleanText(b.text, 200, 'comentário', true);
-    if (room.filter && (hasBadWord(name) || hasBadWord(text))) throw new BadRequest('Este mural está com filtro de palavrões. Reescreva, rabugento!');
-    room.comments.push({ id: room.nextCommentId++, name, text, ts: Date.now(), cid, reactions: {} });
-    if (room.comments.length > 200) room.comments.shift();
-    emitRoom(room);
-    res.json({ ok: true });
-  } catch (e) { fail(res, e); }
-});
-
-app.post('/api/rooms/:code/react', (req, res) => {
-  const room = getRoom(req, res);
-  if (!room) return;
-  try {
-    const b = req.body || {};
-    const cid = cleanText(b.clientId, 60, 'cliente', true);
-    if (!REACTIONS.includes(b.emoji)) throw new BadRequest('Reação inválida.');
-    if (limited('rx:' + cid, 20, 10000)) throw new BadRequest('Calma!');
-    const c = room.comments.find((x) => x.id === Number(b.commentId));
-    if (!c) throw new BadRequest('Comentário não encontrado.');
-    const arr = c.reactions[b.emoji] || (c.reactions[b.emoji] = []);
-    const i = arr.indexOf(cid);
-    if (i === -1) arr.push(cid); else arr.splice(i, 1);
-    if (!arr.length) delete c.reactions[b.emoji];
-    emitRoom(room);
-    res.json({ ok: true });
-  } catch (e) { fail(res, e); }
-});
-
-// ---- votação
-app.post('/api/rooms/:code/vote', (req, res) => {
-  const room = getRoom(req, res);
-  if (!room) return;
-  try {
-    const b = req.body || {};
-    const cid = cleanText(b.clientId, 60, 'cliente', true);
-    if (!room.votes.open || room.votes.revealed) throw new BadRequest('A votação não está aberta.');
-    if (!CAT_IDS.includes(b.category)) throw new BadRequest('Categoria inválida.');
-    if (!room.roster.includes(b.candidate)) throw new BadRequest('Jogador inválido.');
-    if (limited('vt:' + cid, 30, 60000)) throw new BadRequest('Calma!');
-    (room.votes.ballots[b.category] || (room.votes.ballots[b.category] = {}))[cid] = b.candidate;
-    emitRoom(room);
-    res.json({ ok: true, myVotes: myVotes(room, cid) });
-  } catch (e) { fail(res, e); }
-});
-
-// ---- ações do organizador
-function adminAction(room, b) {
+function act(room, b, cid) {
   const f = room.format;
+  // valida o apelido ANTES de mexer em qualquer coisa (erro não pode deixar a sala pela metade)
+  const nickname = ['ping', 'react', 'vote', 'comment_delete'].includes(b.action) ? '' : cleanText(b.nickname, 30, 'seu apelido', true);
+  const who = () => nickname;
   switch (b.action) {
-    case 'ping': return;
+    case 'ping': return null;
+
+    // ---- entrar na sala / times
+    case 'join': {
+      const me = who();
+      const team = b.team === 'a' || b.team === 'b' ? b.team : null;
+      let p = room.players.find((x) => x.cid === cid);
+      if (team === null) {
+        if (p) { removePlayer(room, p.id); note(room, me, 'agora só assiste'); }
+        return { body: { me: null } };
+      }
+      if (!p) {
+        const same = room.players.find((x) => x.name.toLowerCase() === me.toLowerCase());
+        if (same && !same.cid) { p = same; p.cid = cid; }
+        else if (same) throw new BadRequest('Já existe um jogador com esse nome. Use outro apelido.');
+      }
+      if (!p) {
+        if (room.players.length >= MAX_PLAYERS) throw new BadRequest('A sala já tem ' + MAX_PLAYERS + ' jogadores.');
+        p = { id: room.nextPlayerId++, name: me, team, cid };
+        room.players.push(p);
+        note(room, me, 'entrou no ' + teamName(room, team));
+      } else {
+        const moved = p.team !== team;
+        if (p.name.toLowerCase() !== me.toLowerCase()) {
+          if (nameTaken(room, me, p.id)) throw new BadRequest('Já existe um jogador com esse nome. Use outro apelido.');
+          p.name = me;
+        }
+        p.team = team;
+        if (moved) note(room, me, 'foi para o ' + teamName(room, team));
+      }
+      CAT_IDS.forEach((c) => { const bl = room.votes.ballots[c]; if (bl && bl[cid] === p.id) delete bl[cid]; });
+      return { body: { me: { id: p.id, name: p.name, team: p.team } } };
+    }
+    case 'player_add': {
+      const me = who();
+      const name = cleanText(b.name, 30, 'nome do jogador', true);
+      const team = needTeam(b.team);
+      if (room.players.length >= MAX_PLAYERS) throw new BadRequest('A sala já tem ' + MAX_PLAYERS + ' jogadores.');
+      if (nameTaken(room, name)) throw new BadRequest('Já existe um jogador com esse nome.');
+      room.players.push({ id: room.nextPlayerId++, name, team, cid: null });
+      note(room, me, 'adicionou ' + name + ' ao ' + teamName(room, team));
+      return null;
+    }
+    case 'player_move': {
+      const me = who();
+      const p = playerById(room, b.playerId);
+      if (!p) throw new BadRequest('Jogador não encontrado.');
+      const team = needTeam(b.team);
+      if (p.team !== team) { p.team = team; note(room, me, 'moveu ' + p.name + ' para o ' + teamName(room, team)); }
+      return null;
+    }
+    case 'player_rename': {
+      const me = who();
+      const p = playerById(room, b.playerId);
+      if (!p) throw new BadRequest('Jogador não encontrado.');
+      const name = cleanText(b.name, 30, 'nome do jogador', true);
+      if (nameTaken(room, name, p.id)) throw new BadRequest('Já existe um jogador com esse nome.');
+      note(room, me, 'renomeou ' + p.name + ' para ' + name);
+      p.name = name;
+      return null;
+    }
+    case 'player_remove': {
+      const me = who();
+      const p = playerById(room, b.playerId);
+      if (!p) throw new BadRequest('Jogador não encontrado.');
+      removePlayer(room, p.id);
+      note(room, me, 'tirou ' + p.name + ' da sala');
+      return null;
+    }
+    case 'shuffle': {
+      const me = who();
+      if (room.players.length < 2) throw new BadRequest('Precisa de pelo menos 2 jogadores para sortear.');
+      const list = room.players.slice();
+      for (let i = list.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [list[i], list[j]] = [list[j], list[i]]; }
+      const first = crypto.randomInt(2) === 0 ? 'a' : 'b';
+      list.forEach((p, i) => { p.team = i % 2 === 0 ? first : first === 'a' ? 'b' : 'a'; });
+      note(room, me, 'sorteou os times');
+      return null;
+    }
+
+    // ---- gols (qualquer um)
+    case 'goal': {
+      const me = who();
+      const team = needTeam(b.team);
+      const own = b.ownGoal === true;
+      if (limited('goal:' + cid, 8, 15000)) throw new BadRequest('Calma! Muitos gols em poucos segundos.');
+      const recent = room.goals.filter((g) => g.team === team && Date.now() - g.ts < DUP_WINDOW_MS).pop();
+      if (recent && b.confirmNew !== true) {
+        return { skip: true, body: { ok: false, needConfirm: true, similar: { team, player: goalPlayerName(room, recent), by: recent.byName, secondsAgo: Math.round((Date.now() - recent.ts) / 1000) } } };
+      }
+      const p = resolvePlayer(room, b, team, own);
+      const running = f.clock && (room.status === 'h1' || room.status === 'h2' || room.status === 'break');
+      const goalId = room.nextGoalId++;
+      room.goals.push({ id: goalId, team, playerId: p ? p.id : null, playerName: p ? p.name : '', ownGoal: own, byName: me, byId: cid, ts: Date.now(), minute: running ? Math.floor(secs(room) / 60) + 1 : null });
+      note(room, me, (own ? 'registrou gol contra a favor do ' : 'marcou gol do ') + teamName(room, team) + (p ? ' (' + p.name + ')' : ''));
+      return { body: { goalId } };
+    }
+    case 'goal_edit': {
+      const me = who();
+      const g = room.goals.find((x) => x.id === Number(b.goalId));
+      if (!g) throw new BadRequest('Gol não encontrado.');
+      const p = resolvePlayer(room, b, g.team, g.ownGoal);
+      g.playerId = p ? p.id : null;
+      g.playerName = p ? p.name : '';
+      note(room, me, p ? 'definiu ' + p.name + ' como autor do gol do ' + teamName(room, g.team) : 'tirou o autor de um gol do ' + teamName(room, g.team));
+      return null;
+    }
+    case 'goal_undo': {
+      const me = who();
+      const i = room.goals.findIndex((x) => x.id === Number(b.goalId));
+      if (i === -1) throw new BadRequest('Gol não encontrado.');
+      const g = room.goals[i];
+      room.goals.splice(i, 1);
+      note(room, me, 'desfez um gol do ' + teamName(room, g.team) + (goalPlayerName(room, g) ? ' (' + goalPlayerName(room, g) + ')' : ''));
+      return null;
+    }
+
+    // ---- relógio e fases (qualquer um)
+    case 'start':
+      if (room.status !== 'pre') throw new BadRequest('O jogo já começou.');
+      phaseChange(room, 'Começar o jogo', () => { room.status = f.clock ? 'h1' : 'live'; room.clock = { baseSeconds: 0, startedAt: f.clock ? Date.now() : null }; });
+      note(room, who(), 'começou o jogo');
+      return null;
+    case 'pause':
+      if ((room.status !== 'h1' && room.status !== 'h2') || room.clock.startedAt === null) throw new BadRequest('O relógio não está correndo.');
+      freeze(room); note(room, who(), 'parou o relógio');
+      return null;
+    case 'resume':
+      if ((room.status !== 'h1' && room.status !== 'h2') || room.clock.startedAt !== null) throw new BadRequest('O relógio já está correndo.');
+      room.clock.startedAt = Date.now(); note(room, who(), 'retomou o relógio');
+      return null;
+    case 'break':
+      if (room.status !== 'h1' || f.halves !== 2) throw new BadRequest('O intervalo só existe no 1º tempo de jogos com 2 tempos.');
+      phaseChange(room, 'Intervalo', () => { freeze(room); room.status = 'break'; });
+      note(room, who(), 'iniciou o intervalo');
+      return null;
+    case 'second':
+      if (room.status !== 'break') throw new BadRequest('O 2º tempo só começa depois do intervalo.');
+      phaseChange(room, 'Começar o 2º tempo', () => { room.status = 'h2'; room.clock = { baseSeconds: f.minutes * 60, startedAt: Date.now() }; });
+      note(room, who(), 'começou o 2º tempo');
+      return null;
+    case 'finish':
+      if (room.status === 'pre' || room.status === 'finished') throw new BadRequest('O jogo não está em andamento.');
+      phaseChange(room, 'Encerrar o jogo', () => { freeze(room); room.status = 'finished'; });
+      note(room, who(), 'encerrou o jogo');
+      return null;
+    case 'undo_phase': {
+      const lp = room.lastPhase;
+      if (!lp) throw new BadRequest('Nada para desfazer.');
+      room.status = lp.status; room.clock = lp.clock; room.lastPhase = null;
+      note(room, who(), 'desfez: ' + lp.label.toLowerCase());
+      return null;
+    }
+    case 'adjust_clock': {
+      const m = Number(b.minutes);
+      const s = Number(b.seconds || 0);
+      if (!Number.isFinite(m) || m < 0 || m > 240 || !Number.isFinite(s) || s < 0 || s > 59) throw new BadRequest('Tempo inválido.');
+      if (room.status !== 'h1' && room.status !== 'h2') throw new BadRequest('Só dá para ajustar com o jogo em andamento.');
+      room.clock = { baseSeconds: m * 60 + s, startedAt: room.clock.startedAt === null ? null : Date.now() };
+      note(room, who(), 'ajustou o relógio');
+      return null;
+    }
+    case 'reset_game':
+      if (b.confirm !== true) throw new BadRequest('Confirmação necessária.');
+      room.status = 'pre'; room.clock = { baseSeconds: 0, startedAt: null }; room.goals = []; room.lastPhase = null;
+      room.votes = { open: false, revealed: false, ballots: {} };
+      note(room, who(), 'zerou o jogo');
+      return null;
 
     case 'setup': {
+      const me = who();
       if (b.title !== undefined) room.title = cleanText(b.title, 40, 'nome do jogo', true);
       if (b.venue !== undefined) room.venue = cleanText(b.venue, 60, 'campo', false);
       if (b.date !== undefined) {
@@ -585,130 +662,83 @@ function adminAction(room, b) {
       if (b.teamA !== undefined) room.teams.a = cleanText(b.teamA, 24, 'time A', true);
       if (b.teamB !== undefined) room.teams.b = cleanText(b.teamB, 24, 'time B', true);
       if (b.preset !== undefined) room.format = parseFormat(b);
-      return;
+      note(room, me, 'mudou a configuração do jogo');
+      return null;
     }
-
-    case 'roster': {
-      const seen = new Set();
-      const list = [];
-      String(b.text || '').split(/\r?\n/).forEach((l) => {
-        const n = l.trim().replace(/\s+/g, ' ').slice(0, 30);
-        if (n && !seen.has(n.toLowerCase())) { seen.add(n.toLowerCase()); list.push(n); }
-      });
-      if (list.length > 40) throw new BadRequest('No máximo 40 nomes.');
-      room.roster = list;
-      return;
-    }
-
-    case 'start':
-      if (room.status !== 'pre') throw new BadRequest('O jogo já começou.');
-      room.status = f.clock ? 'h1' : 'live';
-      room.clock = { baseSeconds: 0, startedAt: f.clock ? Date.now() : null };
-      return;
-    case 'pause':
-      if ((room.status !== 'h1' && room.status !== 'h2') || room.clock.startedAt === null) throw new BadRequest('O relógio não está correndo.');
-      freeze(room);
-      return;
-    case 'resume':
-      if ((room.status !== 'h1' && room.status !== 'h2') || room.clock.startedAt !== null) throw new BadRequest('O relógio já está correndo.');
-      room.clock.startedAt = Date.now();
-      return;
-    case 'break':
-      if (room.status !== 'h1' || f.halves !== 2) throw new BadRequest('O intervalo só existe no 1º tempo de jogos com 2 tempos.');
-      freeze(room);
-      room.status = 'break';
-      return;
-    case 'second':
-      if (room.status !== 'break') throw new BadRequest('O 2º tempo só começa depois do intervalo.');
-      room.status = 'h2';
-      room.clock = { baseSeconds: f.minutes * 60, startedAt: Date.now() };
-      return;
-    case 'finish':
-      if (room.status === 'pre' || room.status === 'finished') throw new BadRequest('O jogo não está em andamento.');
-      freeze(room);
-      room.status = 'finished';
-      return;
-    case 'adjust_clock': {
-      const m = Number(b.minutes);
-      const s = Number(b.seconds || 0);
-      if (!Number.isFinite(m) || m < 0 || m > 240 || !Number.isFinite(s) || s < 0 || s > 59) throw new BadRequest('Tempo inválido.');
-      if (room.status !== 'h1' && room.status !== 'h2') throw new BadRequest('Só dá para ajustar com o jogo em andamento.');
-      room.clock = { baseSeconds: m * 60 + s, startedAt: room.clock.startedAt === null ? null : Date.now() };
-      return;
-    }
-    case 'reset_game':
-      if (b.confirm !== true) throw new BadRequest('Confirmação necessária.');
-      room.status = 'pre';
-      room.clock = { baseSeconds: 0, startedAt: null };
-      room.goals = [];
-      room.votes = { open: false, revealed: false, ballots: {} };
-      return;
-
-    case 'scoring_open': room.scoringOpen = b.open === true; return;
-    case 'new_scorer_code': room.scorerCode = randCode(5); return;
-
-    case 'votes_open': room.votes.open = b.open === true; if (b.open === true) room.votes.revealed = false; return;
-    case 'votes_reveal': room.votes.revealed = true; room.votes.open = false; return;
-    case 'votes_reset': room.votes = { open: false, revealed: false, ballots: {} }; return;
-
-    case 'delete_goal': {
-      const i = room.goals.findIndex((g) => g.id === Number(b.id));
-      if (i === -1) throw new BadRequest('Gol não encontrado.');
-      room.goals.splice(i, 1);
-      return;
-    }
-    case 'resolve_goal': {
-      const g = room.goals.find((x) => x.id === Number(b.id));
-      if (!g) throw new BadRequest('Gol não encontrado.');
-      if (b.decision === 'validate') { g.status = 'ok'; g.varLocked = true; g.varIds = []; }
-      else if (b.decision === 'annul') { g.status = 'annulled'; }
-      else throw new BadRequest('Decisão inválida.');
-      return;
-    }
-
-    case 'delete_comment': {
-      const i = room.comments.findIndex((c) => c.id === Number(b.id));
-      if (i === -1) throw new BadRequest('Comentário não encontrado.');
-      room.comments.splice(i, 1);
-      return;
-    }
-    case 'comments_open': room.commentsOpen = b.open === true; return;
-    case 'filter': room.filter = b.on === true; return;
-
     case 'extend':
       room.expiresAt = Math.min(room.expiresAt + 2 * DAY, room.createdAt + MAX_DAYS * DAY);
-      return;
+      note(room, who(), 'ampliou a duração da sala');
+      return null;
+
+    // ---- mural
+    case 'comment': {
+      const me = who();
+      if (limited('cm:' + cid, 1, 1500) || limited('cmip', 600, 60000)) throw new BadRequest('Calma! Aguarde um instante para comentar de novo.');
+      const text = cleanText(b.text, 200, 'comentário', true);
+      room.comments.push({ id: room.nextCommentId++, name: me, text, ts: Date.now(), cid, reactions: {} });
+      if (room.comments.length > 200) room.comments.shift();
+      return null;
+    }
+    case 'comment_delete': {
+      const i = room.comments.findIndex((c) => c.id === Number(b.commentId));
+      if (i === -1) throw new BadRequest('Comentário não encontrado.');
+      room.comments.splice(i, 1);
+      return null;
+    }
+    case 'react': {
+      if (!REACTIONS.includes(b.emoji)) throw new BadRequest('Reação inválida.');
+      if (limited('rx:' + cid, 20, 10000)) throw new BadRequest('Calma!');
+      const c = room.comments.find((x) => x.id === Number(b.commentId));
+      if (!c) throw new BadRequest('Comentário não encontrado.');
+      const arr = c.reactions[b.emoji] || (c.reactions[b.emoji] = []);
+      const i = arr.indexOf(cid);
+      if (i === -1) arr.push(cid); else arr.splice(i, 1);
+      if (!arr.length) delete c.reactions[b.emoji];
+      return null;
+    }
+
+    // ---- votação
+    case 'vote': {
+      if (!room.votes.open || room.votes.revealed) throw new BadRequest('A votação não está aberta.');
+      if (!CAT_IDS.includes(b.category)) throw new BadRequest('Categoria inválida.');
+      const p = playerById(room, b.playerId);
+      if (!p) throw new BadRequest('Jogador inválido.');
+      if (p.cid && p.cid === cid) throw new BadRequest('Você não pode votar em você mesmo. 😉');
+      if (limited('vt:' + cid, 30, 60000)) throw new BadRequest('Calma!');
+      (room.votes.ballots[b.category] || (room.votes.ballots[b.category] = {}))[cid] = p.id;
+      return { body: { myVotes: myVotes(room, cid) } };
+    }
+    case 'votes_open':
+      if (!room.players.length) throw new BadRequest('Cadastre os jogadores antes de abrir a votação.');
+      room.votes.open = true; room.votes.revealed = false; note(room, who(), 'abriu a votação');
+      return null;
+    case 'votes_close': room.votes.open = false; note(room, who(), 'fechou a votação'); return null;
+    case 'votes_reveal': room.votes.revealed = true; room.votes.open = false; note(room, who(), 'revelou o resultado da votação'); return null;
+    case 'votes_reset': room.votes = { open: false, revealed: false, ballots: {} }; note(room, who(), 'zerou a votação'); return null;
 
     default: throw new BadRequest('Ação desconhecida.');
   }
 }
 
-app.post('/api/rooms/:code/admin', (req, res) => {
+app.post('/api/rooms/:code/do', (req, res) => {
   const room = getRoom(req, res);
   if (!room) return;
   const b = req.body || {};
-  if (limited('adm:' + req.ip, 200, 60000)) return res.status(429).json({ ok: false, error: 'Muitas ações seguidas.' });
-  if (!sameKey(room.adminKey, b.adminKey)) return res.status(401).json({ ok: false, error: 'Chave do organizador incorreta.' });
   try {
+    const cid = cleanText(b.clientId, 60, 'cliente', true);
+    if (limited('act:' + cid, 80, 10000)) throw new BadRequest('Calma! Muitas ações seguidas.');
     if (b.action === 'delete_room') {
-      if (b.confirm !== true) throw new BadRequest('Confirmação necessária.');
+      if (b.confirm !== 'APAGAR') throw new BadRequest('Para apagar, digite APAGAR.');
       rooms.delete(room.code);
       io.to(room.code).emit('gone');
       markRemoved(room.code);
       return res.json({ ok: true, deleted: true });
     }
-    adminAction(room, b);
-  } catch (e) { return fail(res, e); }
-  emitRoom(room);
-  res.json({ ok: true, scorerCode: room.scorerCode, room: publicRoom(room) });
-});
-
-app.get('/api/rooms/:code/backup', (req, res) => {
-  const room = getRoom(req, res);
-  if (!room) return;
-  if (!sameKey(room.adminKey, req.get('x-admin-key'))) return res.status(401).json({ ok: false, error: 'Chave do organizador incorreta.' });
-  res.set('Cache-Control', 'no-store');
-  res.json({ ok: true, room });
+    const out = act(room, b, cid);
+    if (out && out.skip) return res.json(out.body);
+    emitRoom(room);
+    res.json(Object.assign({ ok: true }, (out && out.body) || {}));
+  } catch (e) { fail(res, e); }
 });
 
 // ---- QR Code do link da sala
@@ -716,7 +746,7 @@ app.get('/qr/:code.svg', async (req, res) => {
   try {
     const code = String(req.params.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
     const url = req.protocol + '://' + req.get('host') + '/s/' + code;
-    const svg = await QRCode.toString(url, { type: 'svg', margin: 1, color: { dark: '#0e1117', light: '#ffffff' } });
+    const svg = await QRCode.toString(url, { type: 'svg', margin: 1, color: { dark: '#09090b', light: '#ffffff' } });
     res.set('Cache-Control', 'public, max-age=3600');
     res.type('image/svg+xml').send(svg);
   } catch (e) { res.status(500).end(); }
@@ -774,7 +804,7 @@ async function boot() {
   let loaded = false;
   if (storage.mode === 'upstash') {
     try {
-      for (const r of await remoteLoadAll()) if (r && r.code && r.expiresAt > Date.now()) rooms.set(r.code, r);
+      for (const raw of await remoteLoadAll()) { const r = normalizeRoom(raw); if (r && r.expiresAt > Date.now()) rooms.set(r.code, r); }
       loaded = true; storage.lastOk = Date.now();
       console.log('Salas recuperadas do Upstash:', rooms.size);
     } catch (e) {

@@ -61,14 +61,17 @@ async function call(port, method, url, body) {
     let h = (await call(4881, 'GET', '/health')).json;
     check('/health informa o armazenamento (sem revelar URL nem senha)', h.storage.mode === 'upstash' && !JSON.stringify(h).includes(TOKEN) && !JSON.stringify(h).includes('localhost:' + MOCK_PORT));
     let r = await call(4881, 'POST', '/api/rooms', { title: 'Final do Rabugentos', teamA: 'Azul', teamB: 'Laranja', preset: '2x30' });
-    const { code, adminKey, scorerCode } = r.json;
-    const adm = (port, body) => call(port, 'POST', `/api/rooms/${code}/admin`, Object.assign({ adminKey }, body));
-    await adm(4881, { action: 'roster', text: 'Beto\nZé' });
-    await adm(4881, { action: 'start' });
-    await call(4881, 'POST', `/api/rooms/${code}/goal`, { clientId: 'c1', nickname: 'Goleiro', scorerCode, team: 'a', player: 'Zé' });
-    await call(4881, 'POST', `/api/rooms/${code}/comment`, { clientId: 'c2', name: 'Maria', text: 'Que jogão!' });
-    await call(4881, 'POST', `/api/rooms/${code}/admin`, { adminKey, action: 'votes_open', open: true });
-    await call(4881, 'POST', `/api/rooms/${code}/vote`, { clientId: 'v1', category: 'craque', candidate: 'Zé' });
+    const code = r.json.code;
+    const act = (port, cid, body) => call(port, 'POST', `/api/rooms/${code}/do`, Object.assign({ clientId: cid, nickname: cid.toUpperCase() }, body));
+    await act(4881, 'beto', { action: 'join', team: 'a' });
+    await act(4881, 'zeca', { action: 'join', team: 'b' });
+    await act(4881, 'beto', { action: 'player_add', name: 'Seu Zé', team: 'b' });
+    await act(4881, 'beto', { action: 'start' });
+    await act(4881, 'zeca', { action: 'goal', team: 'a', playerName: 'Beto' });
+    await act(4881, 'maria', { action: 'comment', text: 'Que jogão!' });
+    await act(4881, 'beto', { action: 'votes_open' });
+    const zecaId = (await call(4881, 'POST', `/api/rooms/${code}/me`, { clientId: 'zeca' })).json.me.id;
+    await act(4881, 'beto', { action: 'vote', category: 'craque', playerId: zecaId });
     await sleep(1500);
     const before = (await call(4881, 'GET', `/api/rooms/${code}`)).json.room;
     check('(nada foi gravado ainda: o salvamento automático só ocorre em 60 s)', !kv.has('rab:room:' + code));
@@ -82,16 +85,16 @@ async function call(port, method, url, body) {
     r = await call(4882, 'GET', `/api/rooms/${code}`);
     check('a sala voltou com o MESMO código', r.status === 200 && r.json.room.code === code);
     const after = r.json.room;
-    check('placar, gol e quem anotou voltaram', after.score.a === 1 && after.goals.length === 1 && after.goals[0].by === 'Goleiro' && after.goals[0].player === 'Zé');
+    check('placar, gol e quem anotou voltaram', after.score.a === 1 && after.goals.length === 1 && after.goals[0].by === 'ZECA' && after.goals[0].player === 'BETO');
+    check('times e jogadores sem celular voltaram', after.players.map((p) => p.name + p.team).sort().join() === 'BETOa,Seu Zéb,ZECAb');
     check('comentário e votação voltaram', after.comments.length === 1 && after.votes.open === true && after.votes.voters.craque === 1);
     check('o relógio continuou correndo (jogo em andamento)', after.clock.running === true && after.clock.seconds >= before.clock.seconds);
-    check('jogadores e formato voltaram', after.roster.join() === 'Beto,Zé' && after.format.halves === 2 && after.title === 'Final do Rabugentos');
-    r = await call(4882, 'POST', `/api/rooms/${code}/role`, { adminKey, clientId: 'v1' });
-    check('o organizador continua com a MESMA chave (sem ficar de fora)', r.json.admin === true);
-    check('o voto de cada pessoa continua dela', r.json.myVotes.craque === 'Zé');
-    r = await call(4882, 'POST', `/api/rooms/${code}/role`, { scorerCode });
-    check('o código de marcador continua valendo', r.json.scorer === true);
-    r = await call(4882, 'POST', `/api/rooms/${code}/goal`, { clientId: 'c1', nickname: 'Goleiro', scorerCode, team: 'b', player: 'Beto' });
+    check('nome do jogo, formato e histórico voltaram', after.title === 'Final do Rabugentos' && after.format.halves === 2 && after.log.length >= 5);
+    r = await call(4882, 'POST', `/api/rooms/${code}/me`, { clientId: 'zeca' });
+    check('cada pessoa continua no seu time (sem precisar entrar de novo)', r.json.me && r.json.me.team === 'b');
+    r = await call(4882, 'POST', `/api/rooms/${code}/me`, { clientId: 'beto' });
+    check('o voto de cada pessoa continua dela', r.json.myVotes.craque === zecaId);
+    r = await act(4882, 'zeca', { action: 'goal', team: 'b', confirmNew: true });
     check('o jogo segue normalmente depois do reinício (novo gol)', r.json.ok === true);
 
     // ===== 3) salvamento automático e apagar
@@ -102,7 +105,7 @@ async function call(port, method, url, body) {
     check('auto-ping: o app chama o próprio /health para não dormir (enquanto há salas)', pings >= 1, 'pings=' + pings);
     h = (await call(4882, 'GET', '/health')).json;
     check('/health: dados protegidos = true', h.storage.protected === true, JSON.stringify(h.storage));
-    await adm(4882, { action: 'delete_room', confirm: true });
+    await act(4882, 'beto', { action: 'delete_room', confirm: 'APAGAR' });
     const t1 = Date.now(); let gone = false;
     while (Date.now() - t1 < 6000) { if (!kv.has('rab:room:' + code) && !sets.get('rab:rooms').has(code)) { gone = true; break; } await sleep(200); }
     check('apagar a sala também apaga do Upstash', gone);
